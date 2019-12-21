@@ -45,6 +45,7 @@ class Countdown: Countdownable {
         
         if Date() > finishedDate {
             delegate?.timerDidFinish()
+            timer?.invalidate()
         } else {
             delegate?.timerDidFire(with: dateComponentsForCurrentTime)
         }
