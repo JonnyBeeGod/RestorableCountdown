@@ -35,10 +35,13 @@ class Countdown {
     private let minCountdownDuration: TimeInterval
     private let defaults: UserDefaults
     
-    private let userNotificationCenter: UNUserNotificationCenter
+    /// the injected UNUserNotificationCenter if you want to use local notifications for your timer
+    /// UNUserNotificationCenter needs to be injected, from outside to the framework. Passing .current() leads to crashes here
+    /// See this SO post: https://stackoverflow.com/a/49559863
+    private let userNotificationCenter: UNUserNotificationCenter?
     private var notificationRequest: UNNotificationRequest?
     
-    init(delegate: CountdownDelegate, fireInterval: TimeInterval = 0.1, tolerance: Double = 0.05, maxCountdownDuration: TimeInterval = 30 * 60, minCountdownDuration: TimeInterval = 15, defaults: UserDefaults = UserDefaults(suiteName: "RestorableCountdownDefaults") ?? .standard, userNotificationCenter: UNUserNotificationCenter = .current()) {
+    init(delegate: CountdownDelegate, fireInterval: TimeInterval = 0.1, tolerance: Double = 0.05, maxCountdownDuration: TimeInterval = 30 * 60, minCountdownDuration: TimeInterval = 15, defaults: UserDefaults = UserDefaults(suiteName: "RestorableCountdownDefaults") ?? .standard, userNotificationCenter: UNUserNotificationCenter? = nil) {
         self.delegate = delegate
         self.fireInterval = fireInterval
         self.tolerance = tolerance
@@ -93,7 +96,7 @@ extension Countdown: Countdownable {
     }
     
     private func scheduleLocalNotification() {
-        guard let notificationRequest = notificationRequest else {
+        guard let notificationRequest = notificationRequest, let userNotificationCenter = userNotificationCenter else {
             return
         }
         
@@ -102,8 +105,8 @@ extension Countdown: Countdownable {
             case .denied, .notDetermined:
                 return
             case .authorized, .provisional:
-                self.userNotificationCenter.removeAllPendingNotificationRequests()
-                self.userNotificationCenter.add(notificationRequest)
+                userNotificationCenter.removeAllPendingNotificationRequests()
+                userNotificationCenter.add(notificationRequest)
             @unknown default:
                 return
             }
