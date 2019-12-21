@@ -25,6 +25,7 @@ protocol Countdownable {
 class Countdown {
     
     private weak var delegate: CountdownDelegate?
+    
     private var timer: Timer?
     private var finishedDate: Date?
     private let fireInterval: TimeInterval
@@ -33,7 +34,7 @@ class Countdown {
     private let minCountdownDuration: TimeInterval
     private let defaults: UserDefaults
     
-    init(delegate: CountdownDelegate, fireInterval: TimeInterval = 0.1, tolerance: Double = 0.05, maxCountdownDuration: TimeInterval = 30 * 60, minCountdownDuration: TimeInterval = 15, defaults: UserDefaults = .standard) {
+    init(delegate: CountdownDelegate, fireInterval: TimeInterval = 0.1, tolerance: Double = 0.05, maxCountdownDuration: TimeInterval = 30 * 60, minCountdownDuration: TimeInterval = 15, defaults: UserDefaults = UserDefaults(suiteName: "RestorableCountdownDefaults") ?? .standard) {
         self.delegate = delegate
         self.fireInterval = fireInterval
         self.tolerance = tolerance
@@ -59,7 +60,7 @@ extension Countdown: Countdownable {
     }
     
     func increaseTime(by seconds: TimeInterval) {
-        let currentSavedDefaultCountdownRuntime = defaults.double(forKey: "savedDefaultCountdownRuntime")
+        let currentSavedDefaultCountdownRuntime = defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
         let increasedRuntime = currentSavedDefaultCountdownRuntime + seconds
         
         guard increasedRuntime <=  maxCountdownDuration else {
@@ -67,11 +68,11 @@ extension Countdown: Countdownable {
         }
         
         finishedDate = finishedDate?.addingTimeInterval(seconds)
-        defaults.set(increasedRuntime, forKey: "savedDefaultCountdownRuntime")
+        defaults.set(increasedRuntime, forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
     }
     
     func decreaseTime(by seconds: TimeInterval) {
-        let currentSavedDefaultCountdownRuntime = defaults.double(forKey: "savedDefaultCountdownRuntime")
+        let currentSavedDefaultCountdownRuntime = defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
         let decreasedRuntime = currentSavedDefaultCountdownRuntime - seconds
         
         guard decreasedRuntime > minCountdownDuration else {
@@ -79,7 +80,7 @@ extension Countdown: Countdownable {
         }
         
         finishedDate = finishedDate?.addingTimeInterval(-seconds)
-        defaults.set(decreasedRuntime, forKey: "savedDefaultCountdownRuntime")
+        defaults.set(decreasedRuntime, forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
     }
     
     private func configureAndStartTimer() {

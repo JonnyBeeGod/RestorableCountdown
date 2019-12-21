@@ -19,7 +19,7 @@ final class RestorableBackgroundTimerTests: XCTestCase {
         mockDelegate.timerDidFinishExpectation = timerDidFinishExpectation
         mockDelegate.timerDidFireExpectation = timerDidFireExpectation
         
-        let timer = Countdown(delegate: mockDelegate)
+        let timer = Countdown(delegate: mockDelegate, defaults: MockUserDefaults())
         
         timer.startCountdown(with: Date().addingTimeInterval(1))
         waitForExpectations(timeout: 2, handler: nil)
@@ -41,7 +41,7 @@ final class RestorableBackgroundTimerTests: XCTestCase {
         mockDelegate.timerDidFinishExpectation = timerDidFinishExpectation
         mockDelegate.timerDidFireExpectation = timerDidFireExpectation
         
-        let timer = Countdown(delegate: mockDelegate)
+        let timer = Countdown(delegate: mockDelegate, defaults: MockUserDefaults())
         
         var components = DateComponents()
         components.second = 1
@@ -51,7 +51,7 @@ final class RestorableBackgroundTimerTests: XCTestCase {
     
     func testcurrentRuntime() {
         let mockDelegate = MockCountdownDelegate()
-        let timer = Countdown(delegate: mockDelegate)
+        let timer = Countdown(delegate: mockDelegate, defaults: MockUserDefaults())
         
         XCTAssertNil(timer.currentRuntime())
         timer.startCountdown(with: Date().addingTimeInterval(2))
@@ -70,7 +70,7 @@ final class RestorableBackgroundTimerTests: XCTestCase {
     
     func testIncreaseCountdownTime() {
         let mockDelegate = MockCountdownDelegate()
-        let timer = Countdown(delegate: mockDelegate)
+        let timer = Countdown(delegate: mockDelegate, defaults: MockUserDefaults())
         timer.startCountdown(with: Date().addingTimeInterval(2))
         
         var expectedResult = DateComponents()
@@ -85,7 +85,7 @@ final class RestorableBackgroundTimerTests: XCTestCase {
     
     func testIncreaseCountdownTimeOverMaxTime() {
         let mockDelegate = MockCountdownDelegate()
-        let timer = Countdown(delegate: mockDelegate, maxCountdownDuration: 2)
+        let timer = Countdown(delegate: mockDelegate, maxCountdownDuration: 2, defaults: MockUserDefaults())
         timer.startCountdown(with: Date().addingTimeInterval(2))
         
         var expectedResult = DateComponents()
@@ -99,7 +99,7 @@ final class RestorableBackgroundTimerTests: XCTestCase {
     
     func testDecreaseCountdownTime() {
         let mockDelegate = MockCountdownDelegate()
-        let timer = Countdown(delegate: mockDelegate, minCountdownDuration: 0)
+        let timer = Countdown(delegate: mockDelegate, minCountdownDuration: 0, defaults: MockUserDefaults())
         timer.startCountdown(with: Date().addingTimeInterval(4))
         
         var expectedResult = DateComponents()
@@ -114,7 +114,7 @@ final class RestorableBackgroundTimerTests: XCTestCase {
     
     func testDecreaseCountdownTimeOverZero() {
         let mockDelegate = MockCountdownDelegate()
-        let timer = Countdown(delegate: mockDelegate)
+        let timer = Countdown(delegate: mockDelegate, defaults: MockUserDefaults())
         timer.startCountdown(with: Date().addingTimeInterval(4))
         
         var expectedResult = DateComponents()
@@ -122,7 +122,11 @@ final class RestorableBackgroundTimerTests: XCTestCase {
         
         XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
         
-        timer.decreaseTime(by: 4)
+        timer.decreaseTime(by: 200)
+        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        
+        timer.decreaseTime(by: 3)
+        expectedResult.second = 0
         XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
     }
 
@@ -143,5 +147,15 @@ class MockCountdownDelegate: CountdownDelegate {
     
     func timerDidFinish() {
         timerDidFinishExpectation.fulfill()
+    }
+}
+
+class MockUserDefaults: UserDefaults {
+    init() {
+        super.init(suiteName: nil)!
+        
+        self.register(defaults: [
+            UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue : 4
+        ])
     }
 }
