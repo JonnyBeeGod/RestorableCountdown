@@ -67,6 +67,64 @@ final class RestorableBackgroundTimerTests: XCTestCase {
         
         XCTAssertEqual(Double(runtime.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
     }
+    
+    func testIncreaseCountdownTime() {
+        let mockDelegate = MockCountdownDelegate()
+        let timer = Countdown(delegate: mockDelegate)
+        timer.startCountdown(with: Date().addingTimeInterval(2))
+        
+        var expectedResult = DateComponents()
+        expectedResult.second = 1
+        
+        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        
+        timer.increaseTime(by: 3)
+        expectedResult.second = 4
+        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+    }
+    
+    func testIncreaseCountdownTimeOverMaxTime() {
+        let mockDelegate = MockCountdownDelegate()
+        let timer = Countdown(delegate: mockDelegate, maxCountdownDuration: 2)
+        timer.startCountdown(with: Date().addingTimeInterval(2))
+        
+        var expectedResult = DateComponents()
+        expectedResult.second = 1
+        
+        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        
+        timer.increaseTime(by: 3)
+        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+    }
+    
+    func testDecreaseCountdownTime() {
+        let mockDelegate = MockCountdownDelegate()
+        let timer = Countdown(delegate: mockDelegate)
+        timer.startCountdown(with: Date().addingTimeInterval(4))
+        
+        var expectedResult = DateComponents()
+        expectedResult.second = 3
+        
+        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        
+        timer.decreaseTime(by: 2)
+        expectedResult.second = 1
+        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+    }
+    
+    func testDecreaseCountdownTimeOverZero() {
+        let mockDelegate = MockCountdownDelegate()
+        let timer = Countdown(delegate: mockDelegate)
+        timer.startCountdown(with: Date().addingTimeInterval(4))
+        
+        var expectedResult = DateComponents()
+        expectedResult.second = 3
+        
+        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        
+        timer.decreaseTime(by: 4)
+        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+    }
 
     static var allTests = [
         ("testStartCountDownTimerDidFireItsCallbacks", testStartCountDownTimerDidFireItsCallbacks),
