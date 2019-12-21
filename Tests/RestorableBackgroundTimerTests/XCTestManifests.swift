@@ -4,6 +4,7 @@ import XCTest
 public func allTests() -> [XCTestCaseEntry] {
     return [
         testCase(RestorableBackgroundTimerTests.allTests),
+        testCase(DateComponentsTests.allTests),
     ]
 }
 #endif

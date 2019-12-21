@@ -5,6 +5,12 @@ import PackageDescription
 
 let package = Package(
     name: "RestorableBackgroundTimer",
+    platforms: [
+        .iOS(SupportedPlatform.IOSVersion.v10),
+        .macOS(SupportedPlatform.MacOSVersion.v10_14),
+        .tvOS(SupportedPlatform.TVOSVersion.v9),
+        .watchOS(SupportedPlatform.WatchOSVersion.v3)
+    ],
     products: [
         // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
