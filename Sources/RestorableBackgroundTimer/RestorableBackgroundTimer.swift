@@ -14,7 +14,7 @@ class Countdown: Countdownable {
     
     private weak var delegate: CountdownDelegate?
     private var timer: Timer?
-    private var finishedDate: Date?
+    private var finishedDate: Date!
     private let fireInterval: TimeInterval
     private let tolerance: Double
     
@@ -36,18 +36,11 @@ class Countdown: Countdownable {
     
     @objc
     private func timerTick() {
-        guard let finishedDate = finishedDate, let dateComponentsForCurrentTime = calculateDateComponentsForCurrentTime() else {
-            // running timer without finished Date
-            timer?.invalidate()
-            delegate?.timerDidFinish()
-            return
-        }
-        
         if Date() > finishedDate {
-            delegate?.timerDidFinish()
             timer?.invalidate()
+            delegate?.timerDidFinish()
         } else {
-            delegate?.timerDidFire(with: dateComponentsForCurrentTime)
+            delegate?.timerDidFire(with: calculateDateComponentsForCurrentTime())
         }
     }
     
@@ -58,11 +51,7 @@ class Countdown: Countdownable {
         self.timer = timer
     }
     
-    private func calculateDateComponentsForCurrentTime() -> DateComponents? {
-        guard let finishedDate = finishedDate else {
-            return nil
-        }
-        
+    private func calculateDateComponentsForCurrentTime() -> DateComponents {
         let interval = finishedDate.timeIntervalSince(Date())
         return DateComponents.dateComponents(for: interval)
     }
