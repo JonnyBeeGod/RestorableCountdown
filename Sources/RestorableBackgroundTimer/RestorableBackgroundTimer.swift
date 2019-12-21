@@ -107,7 +107,7 @@ extension Countdown: Countdownable {
     }
     
     private func calculateDateComponentsForCurrentTime() -> DateComponents? {
-        guard let finishedDate = finishedDate else {
+        guard let finishedDate = finishedDate, finishedDate.compare(Date()) != .orderedAscending else {
             return nil
         }
         

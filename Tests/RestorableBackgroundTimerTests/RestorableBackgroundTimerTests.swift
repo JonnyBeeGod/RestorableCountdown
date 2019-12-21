@@ -85,15 +85,18 @@ final class RestorableBackgroundTimerTests: XCTestCase {
     
     func testIncreaseCountdownTimeOverMaxTime() {
         let mockDelegate = MockCountdownDelegate()
-        let timer = Countdown(delegate: mockDelegate, maxCountdownDuration: 2, defaults: MockUserDefaults())
+        let defaults = MockUserDefaults()
+        let timer = Countdown(delegate: mockDelegate, maxCountdownDuration: 2, defaults: defaults)
         timer.startCountdown(with: Date().addingTimeInterval(2))
         
         var expectedResult = DateComponents()
         expectedResult.second = 1
         
+        XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 10)
         XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
         
         timer.increaseTime(by: 3)
+        XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 10)
         XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
     }
     
@@ -114,26 +117,34 @@ final class RestorableBackgroundTimerTests: XCTestCase {
     
     func testDecreaseCountdownTimeOverZero() {
         let mockDelegate = MockCountdownDelegate()
-        let timer = Countdown(delegate: mockDelegate, defaults: MockUserDefaults())
+        let defaults = MockUserDefaults()
+        let timer = Countdown(delegate: mockDelegate, minCountdownDuration: 1, defaults: defaults)
         timer.startCountdown(with: Date().addingTimeInterval(4))
         
         var expectedResult = DateComponents()
         expectedResult.second = 3
         
         XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 10)
         
         timer.decreaseTime(by: 200)
         XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 10)
         
-        timer.decreaseTime(by: 3)
-        expectedResult.second = 0
+        timer.decreaseTime(by: 2)
+        expectedResult.second = 1
         XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 8)
     }
 
     static var allTests = [
         ("testStartCountDownTimerDidFireItsCallbacks", testStartCountDownTimerDidFireItsCallbacks),
         ("testStartCountDown2TimerDidFireItsCallbacks", testStartCountDown2TimerDidFireItsCallbacks),
         ("testcurrentRuntime", testcurrentRuntime),
+        ("testIncreaseCountdownTime", testIncreaseCountdownTime),
+        ("testIncreaseCountdownTimeOverMaxTime", testIncreaseCountdownTimeOverMaxTime),
+        ("testDecreaseCountdownTime", testDecreaseCountdownTime),
+        ("testDecreaseCountdownTimeOverZero", testDecreaseCountdownTimeOverZero),
     ]
 }
 
@@ -154,8 +165,6 @@ class MockUserDefaults: UserDefaults {
     init() {
         super.init(suiteName: nil)!
         
-        self.register(defaults: [
-            UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue : 4
-        ])
+        set(10, forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
     }
 }
