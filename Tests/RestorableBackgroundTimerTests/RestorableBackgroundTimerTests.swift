@@ -99,7 +99,7 @@ final class RestorableBackgroundTimerTests: XCTestCase {
     
     func testDecreaseCountdownTime() {
         let mockDelegate = MockCountdownDelegate()
-        let timer = Countdown(delegate: mockDelegate)
+        let timer = Countdown(delegate: mockDelegate, minCountdownDuration: 0)
         timer.startCountdown(with: Date().addingTimeInterval(4))
         
         var expectedResult = DateComponents()

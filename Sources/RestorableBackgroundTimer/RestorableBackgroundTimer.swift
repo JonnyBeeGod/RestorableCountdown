@@ -30,12 +30,16 @@ class Countdown {
     private let fireInterval: TimeInterval
     private let tolerance: Double
     private let maxCountdownDuration: TimeInterval
+    private let minCountdownDuration: TimeInterval
+    private let defaults: UserDefaults
     
-    init(delegate: CountdownDelegate, fireInterval: TimeInterval = 0.1, tolerance: Double = 0.05, maxCountdownDuration: TimeInterval = 30 * 60) {
+    init(delegate: CountdownDelegate, fireInterval: TimeInterval = 0.1, tolerance: Double = 0.05, maxCountdownDuration: TimeInterval = 30 * 60, minCountdownDuration: TimeInterval = 15, defaults: UserDefaults = .standard) {
         self.delegate = delegate
         self.fireInterval = fireInterval
         self.tolerance = tolerance
         self.maxCountdownDuration = maxCountdownDuration
+        self.minCountdownDuration = minCountdownDuration
+        self.defaults = defaults
     }
 }
 
@@ -55,15 +59,27 @@ extension Countdown: Countdownable {
     }
     
     func increaseTime(by seconds: TimeInterval) {
-        guard let timer = timer else {
+        let currentSavedDefaultCountdownRuntime = defaults.double(forKey: "savedDefaultCountdownRuntime")
+        let increasedRuntime = currentSavedDefaultCountdownRuntime + seconds
+        
+        guard increasedRuntime <=  maxCountdownDuration else {
             return
         }
         
-        
+        finishedDate = finishedDate?.addingTimeInterval(seconds)
+        defaults.set(increasedRuntime, forKey: "savedDefaultCountdownRuntime")
     }
     
     func decreaseTime(by seconds: TimeInterval) {
+        let currentSavedDefaultCountdownRuntime = defaults.double(forKey: "savedDefaultCountdownRuntime")
+        let decreasedRuntime = currentSavedDefaultCountdownRuntime - seconds
         
+        guard decreasedRuntime > minCountdownDuration else {
+            return
+        }
+        
+        finishedDate = finishedDate?.addingTimeInterval(-seconds)
+        defaults.set(decreasedRuntime, forKey: "savedDefaultCountdownRuntime")
     }
     
     private func configureAndStartTimer() {
