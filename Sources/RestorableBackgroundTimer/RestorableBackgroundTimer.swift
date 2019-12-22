@@ -1,12 +1,12 @@
 import Foundation
 import UserNotifications
 
-protocol CountdownDelegate: class {
+public protocol CountdownDelegate: class {
     func timerDidFire(with currentTime: DateComponents)
     func timerDidFinish()
 }
 
-protocol Countdownable {
+public protocol Countdownable {
     func startCountdown(with length: DateComponents, with userNotificationRequest: UNNotificationRequest?)
     func startCountdown(with finishedDate: Date, with userNotificationRequest: UNNotificationRequest?)
     
@@ -23,7 +23,7 @@ protocol Countdownable {
     func decreaseTime(by seconds: TimeInterval)
 }
 
-class Countdown {
+public class Countdown {
     
     private weak var delegate: CountdownDelegate?
     
@@ -41,7 +41,7 @@ class Countdown {
     private let userNotificationCenter: UNUserNotificationCenter?
     private var notificationRequest: UNNotificationRequest?
     
-    init(delegate: CountdownDelegate, fireInterval: TimeInterval = 0.1, tolerance: Double = 0.05, maxCountdownDuration: TimeInterval = 30 * 60, minCountdownDuration: TimeInterval = 15, defaults: UserDefaults = UserDefaults(suiteName: "RestorableCountdownDefaults") ?? .standard, userNotificationCenter: UNUserNotificationCenter? = nil) {
+    public init(delegate: CountdownDelegate, fireInterval: TimeInterval = 0.1, tolerance: Double = 0.05, maxCountdownDuration: TimeInterval = 30 * 60, minCountdownDuration: TimeInterval = 15, defaults: UserDefaults = UserDefaults(suiteName: "RestorableCountdownDefaults") ?? .standard, userNotificationCenter: UNUserNotificationCenter? = nil) {
         self.delegate = delegate
         self.fireInterval = fireInterval
         self.tolerance = tolerance
@@ -53,11 +53,11 @@ class Countdown {
 }
 
 extension Countdown: Countdownable {
-    func startCountdown(with length: DateComponents, with userNotificationRequest: UNNotificationRequest? = nil) {
+    public func startCountdown(with length: DateComponents, with userNotificationRequest: UNNotificationRequest? = nil) {
         startCountdown(with: calculateDate(for: length), with: userNotificationRequest)
     }
     
-    func startCountdown(with finishedDate: Date, with userNotificationRequest: UNNotificationRequest? = nil) {
+    public func startCountdown(with finishedDate: Date, with userNotificationRequest: UNNotificationRequest? = nil) {
         self.notificationRequest = userNotificationRequest
         self.finishedDate = finishedDate
         
@@ -65,11 +65,11 @@ extension Countdown: Countdownable {
         scheduleLocalNotification()
     }
     
-    func currentRuntime() -> DateComponents? {
+    public func currentRuntime() -> DateComponents? {
         return calculateDateComponentsForCurrentTime()
     }
     
-    func increaseTime(by seconds: TimeInterval) {
+    public func increaseTime(by seconds: TimeInterval) {
         let currentSavedDefaultCountdownRuntime = defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
         let increasedRuntime = currentSavedDefaultCountdownRuntime + seconds
         
@@ -82,7 +82,7 @@ extension Countdown: Countdownable {
         scheduleLocalNotification()
     }
     
-    func decreaseTime(by seconds: TimeInterval) {
+    public func decreaseTime(by seconds: TimeInterval) {
         let currentSavedDefaultCountdownRuntime = defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
         let decreasedRuntime = currentSavedDefaultCountdownRuntime - seconds
         
