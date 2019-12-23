@@ -70,9 +70,9 @@ public class Countdown: CountdownBackgroundRestorable {
     
     func invalidate() {
         timer?.invalidate()
-        finishedDate = nil
-        
         defaults.set(finishedDate, forKey: UserDefaultsConstants.countdownFinishedDate.rawValue)
+        
+        finishedDate = nil
     }
     
     func restore() {
@@ -81,6 +81,11 @@ public class Countdown: CountdownBackgroundRestorable {
         }
         
         startCountdown(with: finishedDate)
+        cleanupSavedFinishedDate()
+    }
+    
+    private func cleanupSavedFinishedDate() {
+        defaults.set(nil, forKey: UserDefaultsConstants.countdownFinishedDate.rawValue)
     }
 }
 
@@ -179,7 +184,9 @@ extension Countdown: Countdownable {
     private func finishCountdown() {
         timer?.invalidate()
         delegate?.timerDidFinish()
-        self.finishedDate = nil
+        finishedDate = nil
+        
+        cleanupSavedFinishedDate()
     }
     
     private func calculateDateComponentsForCurrentTime() -> DateComponents? {

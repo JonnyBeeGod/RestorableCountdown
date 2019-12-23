@@ -159,6 +159,29 @@ final class CountdownTests: XCTestCase {
         
         // TODO: also test notification. Since injecting of default center crashes skip for now
     }
+    
+    func testInvalidateRestoreCountdow() {
+        let mockDefaults = MockUserDefaults()
+        let countdown = Countdown(delegate: MockCountdownDelegate(), defaults: mockDefaults)
+        
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        
+        countdown.startCountdown(with: Date.distantFuture)
+        XCTAssertNotNil(countdown.currentRuntime())
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        
+        countdown.invalidate()
+        XCTAssertNil(countdown.currentRuntime())
+        XCTAssertNotNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        
+        countdown.restore()
+        XCTAssertNotNil(countdown.currentRuntime())
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        
+        countdown.skipRunningCountdown()
+        XCTAssertNil(countdown.currentRuntime())
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+    }
 
     static var allTests = [
         ("testStartCountDownTimerDidFireItsCallbacks", testStartCountDownTimerDidFireItsCallbacks),
