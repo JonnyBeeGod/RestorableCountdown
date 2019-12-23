@@ -41,13 +41,17 @@ public class Countdown {
     private let userNotificationCenter: UNUserNotificationCenter?
     private var notificationRequest: UNNotificationRequest?
     
-    public init(delegate: CountdownDelegate, fireInterval: TimeInterval = 0.1, tolerance: Double = 0.05, maxCountdownDuration: TimeInterval = 30 * 60, minCountdownDuration: TimeInterval = 15, defaults: UserDefaults? = nil, userNotificationCenter: UNUserNotificationCenter? = nil) {
+    public convenience init(delegate: CountdownDelegate, fireInterval: TimeInterval = 0.1, tolerance: Double = 0.05, maxCountdownDuration: TimeInterval = 30 * 60, minCountdownDuration: TimeInterval = 15, userNotificationCenter: UNUserNotificationCenter? = nil) {
+        self.init(delegate: delegate, fireInterval: fireInterval, tolerance: tolerance, maxCountdownDuration: maxCountdownDuration, minCountdownDuration: minCountdownDuration, defaults: UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, userNotificationCenter: userNotificationCenter)
+    }
+    
+    init(delegate: CountdownDelegate, fireInterval: TimeInterval, tolerance: Double, maxCountdownDuration: TimeInterval, minCountdownDuration: TimeInterval, defaults: UserDefaults, userNotificationCenter: UNUserNotificationCenter?) {
         self.delegate = delegate
         self.fireInterval = fireInterval
         self.tolerance = tolerance
         self.maxCountdownDuration = maxCountdownDuration
         self.minCountdownDuration = minCountdownDuration
-        self.defaults = defaults ?? UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard
+        self.defaults = defaults
         self.userNotificationCenter = userNotificationCenter
     }
 }
