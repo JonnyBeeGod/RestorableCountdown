@@ -6,7 +6,9 @@
 //
 
 import Foundation
-import UIKit // TODO: this class is UIKit dependent which breaks the platforms constraint
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// hooks into lifecycle methods to safely invalidate a timer when application is going into background and restoring a timer when application goes into foreground again
 protocol CountdownApplicationServiceProtocol {
@@ -23,8 +25,10 @@ class CountdownApplicationService: CountdownApplicationServiceProtocol {
     }
     
     func register() {
+        #if canImport(UIKit)
         notificationCenter.addObserver(self, selector: #selector(willResignActive), name: UIApplication.willResignActiveNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(didBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
+        #endif
     }
     
     @objc
