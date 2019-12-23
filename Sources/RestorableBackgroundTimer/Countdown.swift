@@ -32,7 +32,7 @@ public protocol Countdownable {
 
 public class Countdown: CountdownBackgroundRestorable {
     
-    private weak var delegate: CountdownDelegate?
+    weak var delegate: CountdownDelegate?
     
     private var finishedDate: Date?
     private var timer: Timer?
@@ -51,11 +51,11 @@ public class Countdown: CountdownBackgroundRestorable {
     private let userNotificationCenter: UNUserNotificationCenter?
     private var notificationRequest: UNNotificationRequest?
     
-    public convenience init(delegate: CountdownDelegate, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), userNotificationCenter: UNUserNotificationCenter? = nil) {
+    public convenience init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), userNotificationCenter: UNUserNotificationCenter? = nil) {
         self.init(delegate: delegate, countdownConfiguration: countdownConfiguration, defaults: UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, userNotificationCenter: userNotificationCenter)
     }
     
-    convenience init(delegate: CountdownDelegate, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), defaults: UserDefaults, countdownApplicationService: CountdownApplicationService = CountdownApplicationService(), userNotificationCenter: UNUserNotificationCenter? = nil) {
+    convenience init(delegate: CountdownDelegate?, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), defaults: UserDefaults, countdownApplicationService: CountdownApplicationService = CountdownApplicationService(), userNotificationCenter: UNUserNotificationCenter? = nil) {
         self.init(delegate: delegate,
                   fireInterval: countdownConfiguration.fireInterval,
                   tolerance: countdownConfiguration.tolerance,
@@ -68,7 +68,7 @@ public class Countdown: CountdownBackgroundRestorable {
         countdownApplicationService.countdown = self
     }
     
-    init(delegate: CountdownDelegate, fireInterval: TimeInterval, tolerance: Double, maxCountdownDuration: TimeInterval, minCountdownDuration: TimeInterval, defaults: UserDefaults, countdownApplicationService: CountdownApplicationServiceProtocol, userNotificationCenter: UNUserNotificationCenter?) {
+    init(delegate: CountdownDelegate?, fireInterval: TimeInterval, tolerance: Double, maxCountdownDuration: TimeInterval, minCountdownDuration: TimeInterval, defaults: UserDefaults, countdownApplicationService: CountdownApplicationServiceProtocol, userNotificationCenter: UNUserNotificationCenter?) {
         self.delegate = delegate
         self.fireInterval = fireInterval
         self.tolerance = tolerance
