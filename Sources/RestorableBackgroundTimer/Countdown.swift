@@ -12,8 +12,7 @@ protocol CountdownBackgroundRestorable: class {
 }
 
 public protocol Countdownable: class {
-    func startCountdown(with length: DateComponents, with userNotificationRequest: UNNotificationRequest?)
-    func startCountdown(with finishedDate: Date, with userNotificationRequest: UNNotificationRequest?)
+    func startCountdown(with userNotificationRequest: UNNotificationRequest?)
     
     func currentRuntime() -> DateComponents?
     
@@ -83,17 +82,9 @@ public class Countdown: CountdownBackgroundRestorable {
 
 extension Countdown: Countdownable {
     
-    public func startCountdown(with length: DateComponents, with userNotificationRequest: UNNotificationRequest? = nil) {
-        startCountdown(with: calculateDate(for: length), with: userNotificationRequest)
-    }
-    
-    public func startCountdown(with finishedDate: Date, with userNotificationRequest: UNNotificationRequest? = nil) {
-        self.notificationRequest = userNotificationRequest
-        self.finishedDate = finishedDate
-        
-        configureAndStartTimer()
-        scheduleLocalNotification()
-        countdownApplicationService.register()
+    public func startCountdown(with userNotificationRequest: UNNotificationRequest? = nil) {
+        let calculatedDate = Date().addingTimeInterval(countdownConfiguration.countdownDuration)
+        startCountdown(with: calculatedDate, with: userNotificationRequest)
     }
     
     public func currentRuntime() -> DateComponents? {
@@ -133,6 +124,19 @@ extension Countdown: Countdownable {
             // TODO: only remove the notification requests from this library, not the whole app ?!
             userNotificationCenter.removeAllPendingNotificationRequests()
         }
+    }
+    
+    func startCountdown(with finishedDate: Date, with userNotificationRequest: UNNotificationRequest? = nil) {
+        self.notificationRequest = userNotificationRequest
+        self.finishedDate = finishedDate
+        
+        configureAndStartTimer()
+        scheduleLocalNotification()
+        countdownApplicationService.register()
+    }
+    
+    func startCountdown(with length: DateComponents, with userNotificationRequest: UNNotificationRequest? = nil) {
+        startCountdown(with: calculateDate(for: length), with: userNotificationRequest)
     }
     
     private func scheduleLocalNotification() {
