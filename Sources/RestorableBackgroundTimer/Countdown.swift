@@ -57,8 +57,9 @@ public class Countdown: CountdownBackgroundRestorable {
         self.defaults = defaults
         self.countdownApplicationService = countdownApplicationService
         self.userNotificationCenter = userNotificationCenter
-        
         self.countdownApplicationService.countdown = self
+        
+        persistCountdownRuntime(configuration: countdownConfiguration)
     }
     
     func invalidate() {
@@ -73,6 +74,10 @@ public class Countdown: CountdownBackgroundRestorable {
         
         startCountdown(with: finishedDate)
         cleanupSavedFinishedDate()
+    }
+    
+    private func persistCountdownRuntime(configuration: CountdownConfiguration) {
+        defaults.set(configuration.countdownDuration, forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
     }
     
     private func cleanupSavedFinishedDate() {
