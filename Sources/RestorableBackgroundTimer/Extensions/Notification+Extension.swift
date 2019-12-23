@@ -8,5 +8,6 @@
 import Foundation
 
 extension Notification.Name {
-     static let willResignActive = Notification.Name("willResignActive")
+    static let willResignActive = Notification.Name("willResignActive")
+    static let didBecomeActive = Notification.Name("didBecomeActive")
 }

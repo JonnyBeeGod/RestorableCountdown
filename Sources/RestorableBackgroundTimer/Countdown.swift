@@ -6,6 +6,13 @@ public protocol CountdownDelegate: class {
     func timerDidFinish()
 }
 
+protocol CountdownRestorable: class {
+    var finishedDate: Date? { get }
+    
+    func invalidate()
+    func restore(with finishedDate: Date)
+}
+
 public protocol Countdownable {
     func startCountdown(with length: DateComponents, with userNotificationRequest: UNNotificationRequest?)
     func startCountdown(with finishedDate: Date, with userNotificationRequest: UNNotificationRequest?)
@@ -21,6 +28,8 @@ public protocol Countdownable {
     ///
     /// if the current remaining `seconds` of the countdown are smaller than the supplied number of seconds, this method just returns without decreasing the time
     func decreaseTime(by seconds: TimeInterval)
+    
+    func skipRunningTimer()
 }
 
 public class Countdown {
@@ -57,6 +66,7 @@ public class Countdown {
 }
 
 extension Countdown: Countdownable {
+    
     public func startCountdown(with length: DateComponents, with userNotificationRequest: UNNotificationRequest? = nil) {
         startCountdown(with: calculateDate(for: length), with: userNotificationRequest)
     }
@@ -99,6 +109,15 @@ extension Countdown: Countdownable {
         scheduleLocalNotification()
     }
     
+    public func skipRunningTimer() {
+        invalidateTimer()
+        
+        if let userNotificationCenter = userNotificationCenter {
+            // TODO: only remove the notification requests from this library, not the whole app ?!
+            userNotificationCenter.removeAllPendingNotificationRequests()
+        }
+    }
+    
     private func scheduleLocalNotification() {
         guard let notificationRequest = notificationRequest, let userNotificationCenter = userNotificationCenter else {
             return
@@ -127,17 +146,21 @@ extension Countdown: Countdownable {
     @objc
     private func timerTick() {
         guard let finishedDate = finishedDate, let calculateDateComponentsForCurrentTime = calculateDateComponentsForCurrentTime() else {
-            timer?.invalidate()
-            delegate?.timerDidFinish()
+            invalidateTimer()
             return
         }
         
         if Date() > finishedDate {
-            timer?.invalidate()
-            delegate?.timerDidFinish()
+            invalidateTimer()
         } else {
             delegate?.timerDidFire(with: calculateDateComponentsForCurrentTime)
         }
+    }
+    
+    private func invalidateTimer() {
+        timer?.invalidate()
+        delegate?.timerDidFinish()
+        self.finishedDate = nil
     }
     
     private func calculateDateComponentsForCurrentTime() -> DateComponents? {
