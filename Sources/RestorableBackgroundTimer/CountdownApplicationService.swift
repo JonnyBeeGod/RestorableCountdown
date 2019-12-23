@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit // TODO: this class is UIKit dependent which breaks the platforms constraint
 
 /// hooks into lifecycle methods to safely invalidate a timer when application is going into background and restoring a timer when application goes into foreground again
 protocol CountdownApplicationServiceProtocol {
@@ -15,19 +16,15 @@ protocol CountdownApplicationServiceProtocol {
 class CountdownApplicationService: CountdownApplicationServiceProtocol {
     
     private let notificationCenter: NotificationCenter
+    weak var countdown: CountdownBackgroundRestorable?
     
-    private weak var countdown: CountdownBackgroundRestorable?
-    
-    init(notificationCenter: NotificationCenter = .default, countdown: CountdownBackgroundRestorable) {
+    init(notificationCenter: NotificationCenter = .default) {
         self.notificationCenter = notificationCenter
-        self.countdown = countdown
     }
     
     func register() {
-        notificationCenter.addObserver(self, selector: #selector(willResignActive), name: Notification.Name
-            .willResignActive, object: nil)
-        notificationCenter.addObserver(self, selector: #selector(didBecomeActive), name: Notification.Name
-        .didBecomeActive, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(willResignActive), name: UIApplication.willResignActiveNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(didBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
     }
     
     @objc

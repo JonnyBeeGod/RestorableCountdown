@@ -43,6 +43,7 @@ public class Countdown: CountdownBackgroundRestorable {
     private let minCountdownDuration: TimeInterval
     
     private let defaults: UserDefaults
+    private let countdownApplicationService: CountdownApplicationServiceProtocol
     
     /// the injected UNUserNotificationCenter if you want to use local notifications for your timer
     /// UNUserNotificationCenter needs to be injected, from outside to the framework. Passing .current() leads to crashes here
@@ -51,20 +52,30 @@ public class Countdown: CountdownBackgroundRestorable {
     private var notificationRequest: UNNotificationRequest?
     
     public convenience init(delegate: CountdownDelegate, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), userNotificationCenter: UNUserNotificationCenter? = nil) {
-        self.init(delegate: delegate, fireInterval: countdownConfiguration.fireInterval, tolerance: countdownConfiguration.tolerance, maxCountdownDuration: countdownConfiguration.maxCountdownDuration, minCountdownDuration: countdownConfiguration.minCountdownDuration, defaults: UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, userNotificationCenter: userNotificationCenter)
+        self.init(delegate: delegate, countdownConfiguration: countdownConfiguration, defaults: UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, userNotificationCenter: userNotificationCenter)
     }
     
-    convenience init(delegate: CountdownDelegate, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), defaults: UserDefaults, userNotificationCenter: UNUserNotificationCenter? = nil) {
-        self.init(delegate: delegate, fireInterval: countdownConfiguration.fireInterval, tolerance: countdownConfiguration.tolerance, maxCountdownDuration: countdownConfiguration.maxCountdownDuration, minCountdownDuration: countdownConfiguration.minCountdownDuration, defaults: defaults, userNotificationCenter: userNotificationCenter)
+    convenience init(delegate: CountdownDelegate, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), defaults: UserDefaults, countdownApplicationService: CountdownApplicationService = CountdownApplicationService(), userNotificationCenter: UNUserNotificationCenter? = nil) {
+        self.init(delegate: delegate,
+                  fireInterval: countdownConfiguration.fireInterval,
+                  tolerance: countdownConfiguration.tolerance,
+                  maxCountdownDuration: countdownConfiguration.maxCountdownDuration,
+                  minCountdownDuration: countdownConfiguration.minCountdownDuration,
+                  defaults: defaults,
+                  countdownApplicationService: countdownApplicationService,
+                  userNotificationCenter: userNotificationCenter)
+        
+        countdownApplicationService.countdown = self
     }
     
-    init(delegate: CountdownDelegate, fireInterval: TimeInterval, tolerance: Double, maxCountdownDuration: TimeInterval, minCountdownDuration: TimeInterval, defaults: UserDefaults, userNotificationCenter: UNUserNotificationCenter?) {
+    init(delegate: CountdownDelegate, fireInterval: TimeInterval, tolerance: Double, maxCountdownDuration: TimeInterval, minCountdownDuration: TimeInterval, defaults: UserDefaults, countdownApplicationService: CountdownApplicationServiceProtocol, userNotificationCenter: UNUserNotificationCenter?) {
         self.delegate = delegate
         self.fireInterval = fireInterval
         self.tolerance = tolerance
         self.maxCountdownDuration = maxCountdownDuration
         self.minCountdownDuration = minCountdownDuration
         self.defaults = defaults
+        self.countdownApplicationService = countdownApplicationService
         self.userNotificationCenter = userNotificationCenter
     }
     
