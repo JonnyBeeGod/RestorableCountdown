@@ -15,7 +15,7 @@ class CountdownApplicationServiceTests: XCTestCase {
     var countdownApplicationService: CountdownApplicationService!
     let mockNotificationCenter = MockNotificationCenter()
     
-    func testLifecycle() {
+    func testRegister() {
         countdownApplicationService = CountdownApplicationService(notificationCenter: mockNotificationCenter)
         countdownRestorable = MockCountdownRestorable(delegate: MockCountdownDelegate(), defaults: MockUserDefaults(), countdownApplicationService: countdownApplicationService)
         
@@ -35,6 +35,40 @@ class CountdownApplicationServiceTests: XCTestCase {
         mockNotificationCenter.triggerWillResignActive()
         XCTAssertEqual(countdownRestorable.invalidateCalledCount, 2)
         XCTAssertEqual(countdownRestorable.restoreCalledCount, 1)
+    }
+    
+    func testDeregister() {
+        countdownApplicationService = CountdownApplicationService(notificationCenter: mockNotificationCenter)
+        countdownRestorable = MockCountdownRestorable(delegate: MockCountdownDelegate(), defaults: MockUserDefaults(), countdownApplicationService: countdownApplicationService)
+        
+        countdownApplicationService.register()
+        
+        XCTAssertEqual(countdownRestorable.invalidateCalledCount, 0)
+        XCTAssertEqual(countdownRestorable.restoreCalledCount, 0)
+        
+        mockNotificationCenter.triggerWillResignActive()
+        XCTAssertEqual(countdownRestorable.invalidateCalledCount, 1)
+        XCTAssertEqual(countdownRestorable.restoreCalledCount, 0)
+        
+        mockNotificationCenter.triggerDidBecomeActive()
+        XCTAssertEqual(countdownRestorable.invalidateCalledCount, 1)
+        XCTAssertEqual(countdownRestorable.restoreCalledCount, 1)
+        
+        countdownApplicationService.deregister()
+        
+        mockNotificationCenter.triggerWillResignActive()
+        mockNotificationCenter.triggerDidBecomeActive()
+        
+        XCTAssertEqual(countdownRestorable.invalidateCalledCount, 1)
+        XCTAssertEqual(countdownRestorable.restoreCalledCount, 1)
+        
+        countdownApplicationService.register()
+        
+        mockNotificationCenter.triggerWillResignActive()
+        mockNotificationCenter.triggerDidBecomeActive()
+        
+        XCTAssertEqual(countdownRestorable.invalidateCalledCount, 2)
+        XCTAssertEqual(countdownRestorable.restoreCalledCount, 2)
     }
 
 }
