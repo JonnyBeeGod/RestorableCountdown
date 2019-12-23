@@ -85,18 +85,18 @@ final class CountdownTests: XCTestCase {
     func testIncreaseCountdownTimeOverMaxTime() {
         let mockDelegate = MockCountdownDelegate()
         let defaults = MockUserDefaults()
-        let configuration = CountdownConfiguration(maxCountdownDuration: 2, defaultCountdownDuration: 10)
+        let configuration = CountdownConfiguration(maxCountdownDuration: 2, minCountdownDuration: 0, defaultCountdownDuration: 1)
         let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, defaults: defaults)
         timer.startCountdown(with: Date().addingTimeInterval(2))
         
         var expectedResult = DateComponents()
         expectedResult.second = 1
         
-        XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 10)
+        XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 1)
         XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
         
         timer.increaseTime(by: 3)
-        XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 10)
+        XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 1)
         XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
     }
     
