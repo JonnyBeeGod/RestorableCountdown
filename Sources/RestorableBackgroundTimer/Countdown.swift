@@ -82,8 +82,6 @@ public class Countdown: CountdownBackgroundRestorable {
     func invalidate() {
         timer?.invalidate()
         defaults.set(finishedDate, forKey: UserDefaultsConstants.countdownFinishedDate.rawValue)
-        
-        finishedDate = nil
     }
     
     func restore() {
@@ -112,6 +110,7 @@ extension Countdown: Countdownable {
         
         configureAndStartTimer()
         scheduleLocalNotification()
+        countdownApplicationService.register()
     }
     
     public func currentRuntime() -> DateComponents? {
