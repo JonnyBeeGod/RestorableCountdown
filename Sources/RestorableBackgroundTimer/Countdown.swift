@@ -113,7 +113,7 @@ extension Countdown: Countdownable {
         let currentSavedDefaultCountdownRuntime = defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
         let decreasedRuntime = currentSavedDefaultCountdownRuntime - seconds
         
-        guard decreasedRuntime > countdownConfiguration.minCountdownDuration else {
+        guard decreasedRuntime >= countdownConfiguration.minCountdownDuration else {
             return
         }
         
