@@ -8,6 +8,7 @@
 import XCTest
 @testable import RestorableBackgroundTimer
 
+#if canImport(UIKit)
 class CountdownApplicationServiceTests: XCTestCase {
 
     var countdownRestorable: MockCountdownRestorable!
@@ -60,3 +61,4 @@ class MockNotificationCenter: NotificationCenter {
         self.post(Notification(name: UIApplication.didBecomeActiveNotification))
     }
 }
+#endif
