@@ -197,6 +197,7 @@ extension Countdown: Countdownable {
         finishedDate = nil
         
         cleanupSavedFinishedDate()
+        countdownApplicationService.deregister()
     }
     
     private func calculateDateComponentsForCurrentTime() -> DateComponents? {
