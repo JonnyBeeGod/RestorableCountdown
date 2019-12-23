@@ -27,7 +27,7 @@ public protocol Countdownable {
     /// if the current remaining `seconds` of the countdown are smaller than the supplied number of seconds, this method just returns without decreasing the time
     func decreaseTime(by seconds: TimeInterval)
     
-    func skipRunningTimer()
+    func skipRunningCountdown()
 }
 
 public class Countdown: CountdownBackgroundRestorable {
@@ -128,7 +128,7 @@ extension Countdown: Countdownable {
         scheduleLocalNotification()
     }
     
-    public func skipRunningTimer() {
+    public func skipRunningCountdown() {
         finishCountdown()
         
         if let userNotificationCenter = userNotificationCenter {

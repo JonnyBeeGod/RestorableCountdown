@@ -139,6 +139,26 @@ final class CountdownTests: XCTestCase {
         XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
         XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 8)
     }
+    
+    func testSkipRunningCountdownTests() {
+        let timerDidFinishExpectation = self.expectation(description: "timerDidFinish")
+        timerDidFinishExpectation.expectedFulfillmentCount = 1
+        let mockDelegate = MockCountdownDelegate()
+        mockDelegate.timerDidFinishExpectation = timerDidFinishExpectation
+        let mockDefaults = MockUserDefaults()
+        let timer = Countdown(delegate: mockDelegate, defaults: mockDefaults)
+        
+        XCTAssertNil(timer.currentRuntime())
+        
+        timer.startCountdown(with: Date().addingTimeInterval(1))
+        XCTAssertNotNil(timer.currentRuntime())
+        
+        timer.skipRunningCountdown()
+        XCTAssertNil(timer.currentRuntime())
+        waitForExpectations(timeout: 1)
+        
+        // TODO: also test notification. Since injecting of default center crashes skip for now
+    }
 
     static var allTests = [
         ("testStartCountDownTimerDidFireItsCallbacks", testStartCountDownTimerDidFireItsCallbacks),
