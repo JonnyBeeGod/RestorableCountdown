@@ -11,7 +11,7 @@ protocol CountdownBackgroundRestorable: class {
     func restore()
 }
 
-public protocol Countdownable {
+public protocol Countdownable: class {
     func startCountdown(with length: DateComponents, with userNotificationRequest: UNNotificationRequest?)
     func startCountdown(with finishedDate: Date, with userNotificationRequest: UNNotificationRequest?)
     
@@ -32,7 +32,7 @@ public protocol Countdownable {
 
 public class Countdown: CountdownBackgroundRestorable {
     
-    weak var delegate: CountdownDelegate?
+    public weak var delegate: CountdownDelegate?
     
     private var finishedDate: Date?
     private var timer: Timer?
