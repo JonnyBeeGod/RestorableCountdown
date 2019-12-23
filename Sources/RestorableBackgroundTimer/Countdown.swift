@@ -7,10 +7,8 @@ public protocol CountdownDelegate: class {
 }
 
 protocol CountdownBackgroundRestorable: class {
-    var finishedDate: Date? { get }
-    
     func invalidate()
-    func restore(with finishedDate: Date)
+    func restore()
 }
 
 public protocol Countdownable {
@@ -36,13 +34,14 @@ public class Countdown: CountdownBackgroundRestorable {
     
     private weak var delegate: CountdownDelegate?
     
-    var finishedDate: Date?
-    
+    private var finishedDate: Date?
     private var timer: Timer?
+    
     private let fireInterval: TimeInterval
     private let tolerance: Double
     private let maxCountdownDuration: TimeInterval
     private let minCountdownDuration: TimeInterval
+    
     private let defaults: UserDefaults
     
     /// the injected UNUserNotificationCenter if you want to use local notifications for your timer
@@ -68,9 +67,15 @@ public class Countdown: CountdownBackgroundRestorable {
     func invalidate() {
         timer?.invalidate()
         finishedDate = nil
+        
+        defaults.set(finishedDate, forKey: UserDefaultsConstants.countdownFinishedDate.rawValue)
     }
     
-    func restore(with finishedDate: Date) {
+    func restore() {
+        guard let finishedDate = defaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue) as? Date else {
+            return
+        }
+        
         startCountdown(with: finishedDate)
     }
 }

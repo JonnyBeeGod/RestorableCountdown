@@ -15,13 +15,11 @@ protocol CountdownApplicationServiceProtocol {
 class CountdownApplicationService: CountdownApplicationServiceProtocol {
     
     private let notificationCenter: NotificationCenter
-    private let defaults: UserDefaults
     
-    private weak var countdown: CountdownRestorable?
+    private weak var countdown: CountdownBackgroundRestorable?
     
-    init(notificationCenter: NotificationCenter = .default, defaults: UserDefaults = UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, countdown: CountdownRestorable) {
+    init(notificationCenter: NotificationCenter = .default, countdown: CountdownBackgroundRestorable) {
         self.notificationCenter = notificationCenter
-        self.defaults = defaults
         self.countdown = countdown
     }
     
@@ -35,21 +33,12 @@ class CountdownApplicationService: CountdownApplicationServiceProtocol {
     @objc
     func willResignActive() {
         // save current timer state and invalidate
-        guard let finishedDate = countdown?.finishedDate else {
-            return
-        }
-        
-        defaults.set(finishedDate, forKey: UserDefaultsConstants.countdownFinishedDate.rawValue)
         countdown?.invalidate()
     }
     
     @objc
     func didBecomeActive() {
         // restore timer state
-        guard let finishedDate = defaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue) as? Date else {
-            return
-        }
-        
-        countdown?.restore(with: finishedDate)
+        countdown?.restore()
     }
 }
