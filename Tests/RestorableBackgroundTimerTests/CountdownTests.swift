@@ -164,23 +164,23 @@ final class CountdownTests: XCTestCase {
         let mockDefaults = MockUserDefaults()
         let countdown = Countdown(delegate: MockCountdownDelegate(), defaults: mockDefaults)
         
-        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
         
         countdown.startCountdown(with: Date.distantFuture)
         XCTAssertNotNil(countdown.currentRuntime())
-        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
         
         countdown.invalidate()
         XCTAssertNotNil(countdown.currentRuntime())
-        XCTAssertNotNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        XCTAssertNotNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
         
         countdown.restore()
         XCTAssertNotNil(countdown.currentRuntime())
-        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
         
         countdown.skipRunningCountdown()
         XCTAssertNil(countdown.currentRuntime())
-        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
     }
 
     static var allTests = [

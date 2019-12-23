@@ -61,7 +61,7 @@ public class Countdown: CountdownBackgroundRestorable {
                   tolerance: countdownConfiguration.tolerance,
                   maxCountdownDuration: countdownConfiguration.maxCountdownDuration,
                   minCountdownDuration: countdownConfiguration.minCountdownDuration,
-                  defaultCountdownDuration: countdownConfiguration.defaultCountdownDuration,
+                  countdownDuration: countdownConfiguration.countdownDuration,
                   defaults: defaults,
                   countdownApplicationService: countdownApplicationService,
                   userNotificationCenter: userNotificationCenter)
@@ -69,7 +69,7 @@ public class Countdown: CountdownBackgroundRestorable {
         countdownApplicationService.countdown = self
     }
     
-    init(delegate: CountdownDelegate?, fireInterval: TimeInterval, tolerance: Double, maxCountdownDuration: TimeInterval, minCountdownDuration: TimeInterval, defaultCountdownDuration: TimeInterval, defaults: UserDefaults, countdownApplicationService: CountdownApplicationServiceProtocol, userNotificationCenter: UNUserNotificationCenter?) {
+    init(delegate: CountdownDelegate?, fireInterval: TimeInterval, tolerance: Double, maxCountdownDuration: TimeInterval, minCountdownDuration: TimeInterval, countdownDuration: TimeInterval, defaults: UserDefaults, countdownApplicationService: CountdownApplicationServiceProtocol, userNotificationCenter: UNUserNotificationCenter?) {
         self.delegate = delegate
         self.fireInterval = fireInterval
         self.tolerance = tolerance
@@ -79,16 +79,16 @@ public class Countdown: CountdownBackgroundRestorable {
         self.countdownApplicationService = countdownApplicationService
         self.userNotificationCenter = userNotificationCenter
         
-        self.defaults.register(defaults: [UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue : defaultCountdownDuration])
+        self.defaults.register(defaults: [UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue : countdownDuration])
     }
     
     func invalidate() {
         timer?.invalidate()
-        defaults.set(finishedDate, forKey: UserDefaultsConstants.countdownFinishedDate.rawValue)
+        defaults.set(finishedDate, forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue)
     }
     
     func restore() {
-        guard let finishedDate = defaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue) as? Date else {
+        guard let finishedDate = defaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue) as? Date else {
             return
         }
         
@@ -97,7 +97,7 @@ public class Countdown: CountdownBackgroundRestorable {
     }
     
     private func cleanupSavedFinishedDate() {
-        defaults.set(nil, forKey: UserDefaultsConstants.countdownFinishedDate.rawValue)
+        defaults.set(nil, forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue)
     }
 }
 
