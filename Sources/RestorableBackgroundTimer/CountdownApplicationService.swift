@@ -12,6 +12,8 @@ import UIKit
 
 /// hooks into lifecycle methods to safely invalidate a timer when application is going into background and restoring a timer when application goes into foreground again
 protocol CountdownApplicationServiceProtocol {
+    var countdown: CountdownBackgroundRestorable? { get set }
+    
     func register()
     func deregister()
 }

@@ -19,9 +19,8 @@ final class CountdownTests: XCTestCase {
         mockDelegate.timerDidFinishExpectation = timerDidFinishExpectation
         mockDelegate.timerDidFireExpectation = timerDidFireExpectation
         
-        let timer = Countdown(delegate: mockDelegate, defaults: MockUserDefaults())
-        
-        timer.startCountdown(with: Date().addingTimeInterval(1))
+        let countdown = Countdown(delegate: mockDelegate, defaults: MockUserDefaults())
+        countdown.startCountdown(with: Date().addingTimeInterval(1))
         waitForExpectations(timeout: 2, handler: nil)
     }
     
@@ -86,7 +85,7 @@ final class CountdownTests: XCTestCase {
     func testIncreaseCountdownTimeOverMaxTime() {
         let mockDelegate = MockCountdownDelegate()
         let defaults = MockUserDefaults()
-        let configuration = CountdownConfiguration(maxCountdownDuration: 2)
+        let configuration = CountdownConfiguration(maxCountdownDuration: 2, defaultCountdownDuration: 10)
         let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, defaults: defaults)
         timer.startCountdown(with: Date().addingTimeInterval(2))
         
@@ -120,7 +119,7 @@ final class CountdownTests: XCTestCase {
     func testDecreaseCountdownTimeOverZero() {
         let mockDelegate = MockCountdownDelegate()
         let defaults = MockUserDefaults()
-        let configuration = CountdownConfiguration(minCountdownDuration: 1)
+        let configuration = CountdownConfiguration(minCountdownDuration: 1, defaultCountdownDuration: 10)
         let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, defaults: defaults)
         timer.startCountdown(with: Date().addingTimeInterval(4))
         
@@ -160,27 +159,27 @@ final class CountdownTests: XCTestCase {
         // TODO: also test notification. Since injecting of default center crashes skip for now
     }
     
-    func testInvalidateRestoreCountdow() {
+    func testInvalidateRestoreCountdown() {
         let mockDefaults = MockUserDefaults()
         let countdown = Countdown(delegate: MockCountdownDelegate(), defaults: mockDefaults)
         
-        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
         
         countdown.startCountdown(with: Date.distantFuture)
         XCTAssertNotNil(countdown.currentRuntime())
-        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
         
         countdown.invalidate()
         XCTAssertNotNil(countdown.currentRuntime())
-        XCTAssertNotNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        XCTAssertNotNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
         
         countdown.restore()
         XCTAssertNotNil(countdown.currentRuntime())
-        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
         
         countdown.skipRunningCountdown()
         XCTAssertNil(countdown.currentRuntime())
-        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
     }
 
     static var allTests = [
@@ -191,6 +190,8 @@ final class CountdownTests: XCTestCase {
         ("testIncreaseCountdownTimeOverMaxTime", testIncreaseCountdownTimeOverMaxTime),
         ("testDecreaseCountdownTime", testDecreaseCountdownTime),
         ("testDecreaseCountdownTimeOverZero", testDecreaseCountdownTimeOverZero),
+        ("testSkipRunningCountdownTests", testSkipRunningCountdownTests),
+        ("testInvalidateRestoreCountdown", testInvalidateRestoreCountdown),
     ]
 }
 
@@ -208,9 +209,4 @@ class MockCountdownDelegate: CountdownDelegate {
 }
 
 class MockUserDefaults: UserDefaults {
-    init() {
-        super.init(suiteName: nil)!
-        
-        set(10, forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
-    }
 }
