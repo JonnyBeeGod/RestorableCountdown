@@ -171,7 +171,7 @@ final class CountdownTests: XCTestCase {
         XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
         
         countdown.invalidate()
-        XCTAssertNil(countdown.currentRuntime())
+        XCTAssertNotNil(countdown.currentRuntime())
         XCTAssertNotNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
         
         countdown.restore()
