@@ -1,7 +1,7 @@
 import XCTest
 @testable import RestorableBackgroundTimer
 
-final class RestorableBackgroundTimerTests: XCTestCase {
+final class CountdownTests: XCTestCase {
     
     func testStartCountDownTimerDidFireItsCallbacks() {
         var timerDidFireExpectation: XCTestExpectation!
@@ -86,7 +86,8 @@ final class RestorableBackgroundTimerTests: XCTestCase {
     func testIncreaseCountdownTimeOverMaxTime() {
         let mockDelegate = MockCountdownDelegate()
         let defaults = MockUserDefaults()
-        let timer = Countdown(delegate: mockDelegate, maxCountdownDuration: 2, defaults: defaults)
+        let configuration = CountdownConfiguration(maxCountdownDuration: 2)
+        let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, defaults: defaults)
         timer.startCountdown(with: Date().addingTimeInterval(2))
         
         var expectedResult = DateComponents()
@@ -102,7 +103,8 @@ final class RestorableBackgroundTimerTests: XCTestCase {
     
     func testDecreaseCountdownTime() {
         let mockDelegate = MockCountdownDelegate()
-        let timer = Countdown(delegate: mockDelegate, minCountdownDuration: 0, defaults: MockUserDefaults())
+        let configuration = CountdownConfiguration(minCountdownDuration: 0)
+        let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, defaults: MockUserDefaults())
         timer.startCountdown(with: Date().addingTimeInterval(4))
         
         var expectedResult = DateComponents()
@@ -118,7 +120,8 @@ final class RestorableBackgroundTimerTests: XCTestCase {
     func testDecreaseCountdownTimeOverZero() {
         let mockDelegate = MockCountdownDelegate()
         let defaults = MockUserDefaults()
-        let timer = Countdown(delegate: mockDelegate, minCountdownDuration: 1, defaults: defaults)
+        let configuration = CountdownConfiguration(minCountdownDuration: 1)
+        let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, defaults: defaults)
         timer.startCountdown(with: Date().addingTimeInterval(4))
         
         var expectedResult = DateComponents()
@@ -135,6 +138,49 @@ final class RestorableBackgroundTimerTests: XCTestCase {
         expectedResult.second = 1
         XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
         XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 8)
+    }
+    
+    func testSkipRunningCountdownTests() {
+        let timerDidFinishExpectation = self.expectation(description: "timerDidFinish")
+        timerDidFinishExpectation.expectedFulfillmentCount = 1
+        let mockDelegate = MockCountdownDelegate()
+        mockDelegate.timerDidFinishExpectation = timerDidFinishExpectation
+        let mockDefaults = MockUserDefaults()
+        let timer = Countdown(delegate: mockDelegate, defaults: mockDefaults)
+        
+        XCTAssertNil(timer.currentRuntime())
+        
+        timer.startCountdown(with: Date().addingTimeInterval(1))
+        XCTAssertNotNil(timer.currentRuntime())
+        
+        timer.skipRunningCountdown()
+        XCTAssertNil(timer.currentRuntime())
+        waitForExpectations(timeout: 1)
+        
+        // TODO: also test notification. Since injecting of default center crashes skip for now
+    }
+    
+    func testInvalidateRestoreCountdow() {
+        let mockDefaults = MockUserDefaults()
+        let countdown = Countdown(delegate: MockCountdownDelegate(), defaults: mockDefaults)
+        
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        
+        countdown.startCountdown(with: Date.distantFuture)
+        XCTAssertNotNil(countdown.currentRuntime())
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        
+        countdown.invalidate()
+        XCTAssertNil(countdown.currentRuntime())
+        XCTAssertNotNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        
+        countdown.restore()
+        XCTAssertNotNil(countdown.currentRuntime())
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
+        
+        countdown.skipRunningCountdown()
+        XCTAssertNil(countdown.currentRuntime())
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownFinishedDate.rawValue))
     }
 
     static var allTests = [
