@@ -1,7 +1,7 @@
 import XCTest
 @testable import RestorableBackgroundTimer
 
-final class RestorableBackgroundTimerTests: XCTestCase {
+final class CountdownTests: XCTestCase {
     
     func testStartCountDownTimerDidFireItsCallbacks() {
         var timerDidFireExpectation: XCTestExpectation!

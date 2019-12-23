@@ -6,5 +6,7 @@
 //
 
 enum UserDefaultsConstants: String {
+    case suiteName = "RestorableCountdownDefaults"
+    
     case currentSavedDefaultCountdownRuntime = "currentSavedDefaultCountdownRuntime"
 }
