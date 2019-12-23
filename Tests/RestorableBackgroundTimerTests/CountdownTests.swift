@@ -86,7 +86,8 @@ final class CountdownTests: XCTestCase {
     func testIncreaseCountdownTimeOverMaxTime() {
         let mockDelegate = MockCountdownDelegate()
         let defaults = MockUserDefaults()
-        let timer = Countdown(delegate: mockDelegate, maxCountdownDuration: 2, defaults: defaults)
+        let configuration = CountdownConfiguration(maxCountdownDuration: 2)
+        let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, defaults: defaults)
         timer.startCountdown(with: Date().addingTimeInterval(2))
         
         var expectedResult = DateComponents()
@@ -102,7 +103,8 @@ final class CountdownTests: XCTestCase {
     
     func testDecreaseCountdownTime() {
         let mockDelegate = MockCountdownDelegate()
-        let timer = Countdown(delegate: mockDelegate, minCountdownDuration: 0, defaults: MockUserDefaults())
+        let configuration = CountdownConfiguration(minCountdownDuration: 0)
+        let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, defaults: MockUserDefaults())
         timer.startCountdown(with: Date().addingTimeInterval(4))
         
         var expectedResult = DateComponents()
@@ -118,7 +120,8 @@ final class CountdownTests: XCTestCase {
     func testDecreaseCountdownTimeOverZero() {
         let mockDelegate = MockCountdownDelegate()
         let defaults = MockUserDefaults()
-        let timer = Countdown(delegate: mockDelegate, minCountdownDuration: 1, defaults: defaults)
+        let configuration = CountdownConfiguration(minCountdownDuration: 1)
+        let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, defaults: defaults)
         timer.startCountdown(with: Date().addingTimeInterval(4))
         
         var expectedResult = DateComponents()
