@@ -61,6 +61,7 @@ public class Countdown: CountdownBackgroundRestorable {
                   tolerance: countdownConfiguration.tolerance,
                   maxCountdownDuration: countdownConfiguration.maxCountdownDuration,
                   minCountdownDuration: countdownConfiguration.minCountdownDuration,
+                  defaultCountdownDuration: countdownConfiguration.defaultCountdownDuration,
                   defaults: defaults,
                   countdownApplicationService: countdownApplicationService,
                   userNotificationCenter: userNotificationCenter)
@@ -68,7 +69,7 @@ public class Countdown: CountdownBackgroundRestorable {
         countdownApplicationService.countdown = self
     }
     
-    init(delegate: CountdownDelegate?, fireInterval: TimeInterval, tolerance: Double, maxCountdownDuration: TimeInterval, minCountdownDuration: TimeInterval, defaults: UserDefaults, countdownApplicationService: CountdownApplicationServiceProtocol, userNotificationCenter: UNUserNotificationCenter?) {
+    init(delegate: CountdownDelegate?, fireInterval: TimeInterval, tolerance: Double, maxCountdownDuration: TimeInterval, minCountdownDuration: TimeInterval, defaultCountdownDuration: TimeInterval, defaults: UserDefaults, countdownApplicationService: CountdownApplicationServiceProtocol, userNotificationCenter: UNUserNotificationCenter?) {
         self.delegate = delegate
         self.fireInterval = fireInterval
         self.tolerance = tolerance
@@ -77,6 +78,8 @@ public class Countdown: CountdownBackgroundRestorable {
         self.defaults = defaults
         self.countdownApplicationService = countdownApplicationService
         self.userNotificationCenter = userNotificationCenter
+        
+        self.defaults.register(defaults: [UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue : defaultCountdownDuration])
     }
     
     func invalidate() {
