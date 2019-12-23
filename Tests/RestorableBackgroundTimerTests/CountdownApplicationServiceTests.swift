@@ -70,6 +70,11 @@ class CountdownApplicationServiceTests: XCTestCase {
         XCTAssertEqual(countdownRestorable.invalidateCalledCount, 2)
         XCTAssertEqual(countdownRestorable.restoreCalledCount, 2)
     }
+    
+    static var allTests = [
+        ("testRegister", testRegister),
+        ("testDeregister", testDeregister),
+    ]
 
 }
 
