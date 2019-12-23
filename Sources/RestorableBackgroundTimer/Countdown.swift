@@ -6,7 +6,7 @@ public protocol CountdownDelegate: class {
     func timerDidFinish()
 }
 
-protocol CountdownRestorable: class {
+protocol CountdownBackgroundRestorable: class {
     var finishedDate: Date? { get }
     
     func invalidate()
@@ -32,12 +32,13 @@ public protocol Countdownable {
     func skipRunningTimer()
 }
 
-public class Countdown {
+public class Countdown: CountdownBackgroundRestorable {
     
     private weak var delegate: CountdownDelegate?
     
+    var finishedDate: Date?
+    
     private var timer: Timer?
-    private var finishedDate: Date?
     private let fireInterval: TimeInterval
     private let tolerance: Double
     private let maxCountdownDuration: TimeInterval
@@ -62,6 +63,15 @@ public class Countdown {
         self.minCountdownDuration = minCountdownDuration
         self.defaults = defaults
         self.userNotificationCenter = userNotificationCenter
+    }
+    
+    func invalidate() {
+        timer?.invalidate()
+        finishedDate = nil
+    }
+    
+    func restore(with finishedDate: Date) {
+        startCountdown(with: finishedDate)
     }
 }
 
@@ -110,7 +120,7 @@ extension Countdown: Countdownable {
     }
     
     public func skipRunningTimer() {
-        invalidateTimer()
+        finishCountdown()
         
         if let userNotificationCenter = userNotificationCenter {
             // TODO: only remove the notification requests from this library, not the whole app ?!
@@ -146,18 +156,18 @@ extension Countdown: Countdownable {
     @objc
     private func timerTick() {
         guard let finishedDate = finishedDate, let calculateDateComponentsForCurrentTime = calculateDateComponentsForCurrentTime() else {
-            invalidateTimer()
+            finishCountdown()
             return
         }
         
         if Date() > finishedDate {
-            invalidateTimer()
+            finishCountdown()
         } else {
             delegate?.timerDidFire(with: calculateDateComponentsForCurrentTime)
         }
     }
     
-    private func invalidateTimer() {
+    private func finishCountdown() {
         timer?.invalidate()
         delegate?.timerDidFinish()
         self.finishedDate = nil
