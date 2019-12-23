@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import UIKit
+import UIKit // TODO: this class is UIKit dependent which breaks the platforms constraint
 
 /// hooks into lifecycle methods to safely invalidate a timer when application is going into background and restoring a timer when application goes into foreground again
 protocol CountdownApplicationServiceProtocol {
