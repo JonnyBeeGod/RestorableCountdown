@@ -19,7 +19,7 @@ public protocol Countdownable: class {
     
     /// increases the duration of the countdown by the supplied number of seconds
     ///
-    /// if the supplied number of `seconds` added on the current countdown duration exceeds  `maxCountdownDuration`, this method returns without increasing time
+    /// if the supplied number of `seconds` added on the current countdown duration exceeds  `countdownConfiguration.maxCountdownDuration`, this method returns without increasing time
     func increaseTime(by seconds: TimeInterval)
     
     /// decreases the duration of the countdown by the supplied number of seconds
@@ -37,13 +37,10 @@ public class Countdown: CountdownBackgroundRestorable {
     private var finishedDate: Date?
     private var timer: Timer?
     
-    private let fireInterval: TimeInterval
-    private let tolerance: Double
-    private let maxCountdownDuration: TimeInterval
-    private let minCountdownDuration: TimeInterval
+    private let countdownConfiguration: CountdownConfiguration
     
     private let defaults: UserDefaults
-    private let countdownApplicationService: CountdownApplicationServiceProtocol
+    private var countdownApplicationService: CountdownApplicationServiceProtocol
     
     /// the injected UNUserNotificationCenter if you want to use local notifications for your timer
     /// UNUserNotificationCenter needs to be injected, from outside to the framework. Passing .current() leads to crashes here
@@ -52,34 +49,17 @@ public class Countdown: CountdownBackgroundRestorable {
     private var notificationRequest: UNNotificationRequest?
     
     public convenience init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), userNotificationCenter: UNUserNotificationCenter? = nil) {
-        self.init(delegate: delegate, countdownConfiguration: countdownConfiguration, defaults: UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, userNotificationCenter: userNotificationCenter)
+        self.init(delegate: delegate, countdownConfiguration: countdownConfiguration, defaults: UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, countdownApplicationService: CountdownApplicationService(), userNotificationCenter: userNotificationCenter)
     }
     
-    convenience init(delegate: CountdownDelegate?, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), defaults: UserDefaults, countdownApplicationService: CountdownApplicationService = CountdownApplicationService(), userNotificationCenter: UNUserNotificationCenter? = nil) {
-        self.init(delegate: delegate,
-                  fireInterval: countdownConfiguration.fireInterval,
-                  tolerance: countdownConfiguration.tolerance,
-                  maxCountdownDuration: countdownConfiguration.maxCountdownDuration,
-                  minCountdownDuration: countdownConfiguration.minCountdownDuration,
-                  countdownDuration: countdownConfiguration.countdownDuration,
-                  defaults: defaults,
-                  countdownApplicationService: countdownApplicationService,
-                  userNotificationCenter: userNotificationCenter)
-        
-        countdownApplicationService.countdown = self
-    }
-    
-    init(delegate: CountdownDelegate?, fireInterval: TimeInterval, tolerance: Double, maxCountdownDuration: TimeInterval, minCountdownDuration: TimeInterval, countdownDuration: TimeInterval, defaults: UserDefaults, countdownApplicationService: CountdownApplicationServiceProtocol, userNotificationCenter: UNUserNotificationCenter?) {
+    init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), defaults: UserDefaults = UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, countdownApplicationService: CountdownApplicationServiceProtocol = CountdownApplicationService(), userNotificationCenter: UNUserNotificationCenter? = nil) {
         self.delegate = delegate
-        self.fireInterval = fireInterval
-        self.tolerance = tolerance
-        self.maxCountdownDuration = maxCountdownDuration
-        self.minCountdownDuration = minCountdownDuration
+        self.countdownConfiguration = countdownConfiguration
         self.defaults = defaults
         self.countdownApplicationService = countdownApplicationService
         self.userNotificationCenter = userNotificationCenter
         
-        self.defaults.register(defaults: [UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue : countdownDuration])
+        self.countdownApplicationService.countdown = self
     }
     
     func invalidate() {
@@ -124,7 +104,7 @@ extension Countdown: Countdownable {
         let currentSavedDefaultCountdownRuntime = defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
         let increasedRuntime = currentSavedDefaultCountdownRuntime + seconds
         
-        guard increasedRuntime <=  maxCountdownDuration else {
+        guard increasedRuntime <=  countdownConfiguration.maxCountdownDuration else {
             return
         }
         
@@ -137,7 +117,7 @@ extension Countdown: Countdownable {
         let currentSavedDefaultCountdownRuntime = defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
         let decreasedRuntime = currentSavedDefaultCountdownRuntime - seconds
         
-        guard decreasedRuntime > minCountdownDuration else {
+        guard decreasedRuntime > countdownConfiguration.minCountdownDuration else {
             return
         }
         
@@ -174,8 +154,8 @@ extension Countdown: Countdownable {
     }
     
     private func configureAndStartTimer() {
-        let timer = Timer(timeInterval: fireInterval, target: self, selector: #selector(timerTick), userInfo: nil, repeats: true)
-        timer.tolerance = tolerance
+        let timer = Timer(timeInterval: countdownConfiguration.fireInterval, target: self, selector: #selector(timerTick), userInfo: nil, repeats: true)
+        timer.tolerance = countdownConfiguration.tolerance
         RunLoop.current.add(timer, forMode: RunLoop.Mode.default)
         self.timer = timer
     }

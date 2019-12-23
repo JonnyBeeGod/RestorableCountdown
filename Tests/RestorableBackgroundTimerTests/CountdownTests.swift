@@ -19,9 +19,8 @@ final class CountdownTests: XCTestCase {
         mockDelegate.timerDidFinishExpectation = timerDidFinishExpectation
         mockDelegate.timerDidFireExpectation = timerDidFireExpectation
         
-        let timer = Countdown(delegate: mockDelegate, defaults: MockUserDefaults())
-        
-        timer.startCountdown(with: Date().addingTimeInterval(1))
+        let countdown = Countdown(delegate: mockDelegate, defaults: MockUserDefaults())
+        countdown.startCountdown(with: Date().addingTimeInterval(1))
         waitForExpectations(timeout: 2, handler: nil)
     }
     
