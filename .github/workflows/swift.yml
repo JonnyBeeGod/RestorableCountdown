@@ -12,4 +12,6 @@ jobs:
     - name: Build
       run: swift build -v
     - name: Run tests
-      run: swift test -v
+      run: xcodebuild test -scheme RestorableCountdown -destination platform="macOS" -enableCodeCoverage YES -derivedDataPath .build/derivedData
+    - name: Codecov
+      uses: codecov/codecov-action@v1.0.5
