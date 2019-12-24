@@ -1,5 +1,5 @@
 import XCTest
-@testable import RestorableBackgroundTimer
+@testable import RestorableCountdown
 
 final class CountdownTests: XCTestCase {
     

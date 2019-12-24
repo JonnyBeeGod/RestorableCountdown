@@ -7,7 +7,7 @@
 
 import XCTest
 import UserNotifications
-@testable import RestorableBackgroundTimer
+@testable import RestorableCountdown
 
 class CountdownNotificationBuilderTests: XCTestCase {
     

@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import RestorableBackgroundTimer
+@testable import RestorableCountdown
 
 #if canImport(UIKit)
 class CountdownApplicationServiceTests: XCTestCase {
