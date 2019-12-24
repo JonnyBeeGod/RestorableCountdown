@@ -144,8 +144,7 @@ final class CountdownTests: XCTestCase {
         timerDidFinishExpectation.expectedFulfillmentCount = 1
         let mockDelegate = MockCountdownDelegate()
         mockDelegate.timerDidFinishExpectation = timerDidFinishExpectation
-        let mockDefaults = MockUserDefaults()
-        let timer = Countdown(delegate: mockDelegate, defaults: mockDefaults)
+        let timer = Countdown(delegate: mockDelegate)
         
         XCTAssertNil(timer.currentRuntime())
         
