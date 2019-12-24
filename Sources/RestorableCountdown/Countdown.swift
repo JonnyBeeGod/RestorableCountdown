@@ -127,10 +127,8 @@ extension Countdown: Countdownable {
     public func skipRunningCountdown() {
         finishCountdown()
         
-        if let userNotificationCenter = userNotificationCenter {
-            // TODO: only remove the notification requests from this library, not the whole app ?!
-            userNotificationCenter.removeAllPendingNotificationRequests()
-        }
+        // TODO: only remove the notification requests from this library, not the whole app ?!
+        userNotificationCenter?.removeAllPendingNotificationRequests()
     }
     
     func startCountdown(with finishedDate: Date, with userNotificationContent: UNNotificationContent? = nil) {
