@@ -8,7 +8,6 @@
 import XCTest
 @testable import RestorableCountdown
 
-#if canImport(UIKit)
 class CountdownApplicationServiceTests: XCTestCase {
 
     var countdownRestorable: MockCountdownRestorable!
@@ -93,11 +92,18 @@ class MockCountdownRestorable: Countdown {
 
 class MockNotificationCenter: NotificationCenter {
     func triggerWillResignActive() {
+        #if canImport(UIKit)
         self.post(Notification(name: UIApplication.willResignActiveNotification))
+        #elseif canImport(AppKit)
+        self.post(Notification(name: NSApplication.willResignActiveNotification))
+        #endif
     }
     
     func triggerDidBecomeActive() {
+        #if canImport(UIKit)
         self.post(Notification(name: UIApplication.didBecomeActiveNotification))
+        #elseif canImport(AppKit)
+        self.post(Notification(name: NSApplication.didBecomeActiveNotification))
+        #endif
     }
 }
-#endif

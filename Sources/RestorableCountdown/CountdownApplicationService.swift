@@ -8,6 +8,8 @@
 import Foundation
 #if canImport(UIKit)
 import UIKit
+#elseif canImport(AppKit)
+import AppKit
 #endif
 
 /// hooks into lifecycle methods to safely invalidate a timer when application is going into background and restoring a timer when application goes into foreground again
@@ -31,6 +33,9 @@ class CountdownApplicationService: CountdownApplicationServiceProtocol {
         #if canImport(UIKit)
         notificationCenter.addObserver(self, selector: #selector(willResignActive), name: UIApplication.willResignActiveNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(didBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
+        #elseif canImport(AppKit)
+        notificationCenter.addObserver(self, selector: #selector(willResignActive), name: NSApplication.willResignActiveNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(didBecomeActive), name: NSApplication.didBecomeActiveNotification, object: nil)
         #endif
     }
     
@@ -38,6 +43,9 @@ class CountdownApplicationService: CountdownApplicationServiceProtocol {
         #if canImport(UIKit)
         notificationCenter.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
         notificationCenter.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
+        #elseif canImport(AppKit)
+        notificationCenter.removeObserver(self, name: NSApplication.willResignActiveNotification, object: nil)
+        notificationCenter.removeObserver(self, name: NSApplication.didBecomeActiveNotification, object: nil)
         #endif
     }
     
