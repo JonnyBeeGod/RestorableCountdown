@@ -1,14 +1,6 @@
 import Foundation
 import UserNotifications
 
-protocol UserNotificationCenter {
-    func getNotificationSettings(completionHandler: @escaping (UNNotificationSettings) -> Void)
-    func removeAllPendingNotificationRequests()
-    func add(_ request: UNNotificationRequest, withCompletionHandler completionHandler: ((Error?) -> Void)?)
-}
-
-extension UNUserNotificationCenter: UserNotificationCenter {}
-
 public protocol CountdownDelegate: class {
     func timerDidFire(with currentTime: DateComponents)
     func timerDidFinish()
