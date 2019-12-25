@@ -153,12 +153,10 @@ extension Countdown: Countdownable {
         
         userNotificationCenter.getNotificationSettings { (settings) in
             switch settings.authorizationStatus {
-            case .denied, .notDetermined:
-                return
-            case .authorized, .provisional:
+                case .authorized, .provisional:
                 userNotificationCenter.removeAllPendingNotificationRequests()
                 userNotificationCenter.add(request, withCompletionHandler: nil)
-            @unknown default:
+            default:
                 return
             }
         }
@@ -173,16 +171,12 @@ extension Countdown: Countdownable {
     
     @objc
     private func timerTick() {
-        guard let finishedDate = finishedDate, let calculateDateComponentsForCurrentTime = calculateDateComponentsForCurrentTime() else {
+        guard let finishedDate = finishedDate, Date() < finishedDate, let calculateDateComponentsForCurrentTime = calculateDateComponentsForCurrentTime() else {
             finishCountdown()
             return
         }
         
-        if Date() > finishedDate {
-            finishCountdown()
-        } else {
-            delegate?.timerDidFire(with: calculateDateComponentsForCurrentTime)
-        }
+        delegate?.timerDidFire(with: calculateDateComponentsForCurrentTime)
     }
     
     private func finishCountdown() {
