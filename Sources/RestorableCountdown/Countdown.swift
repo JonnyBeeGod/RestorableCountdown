@@ -45,14 +45,14 @@ public class Countdown: CountdownBackgroundRestorable {
     /// the injected UNUserNotificationCenter if you want to use local notifications for your timer
     /// UNUserNotificationCenter needs to be injected, from outside to the framework. Passing .current() leads to crashes here
     /// See this SO post: https://stackoverflow.com/a/49559863
-    private let userNotificationCenter: UNUserNotificationCenter?
+    private let userNotificationCenter: UserNotificationCenter?
     private var notificationContent: UNNotificationContent?
     
     public convenience init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), userNotificationCenter: UNUserNotificationCenter? = nil) {
         self.init(delegate: delegate, countdownConfiguration: countdownConfiguration, defaults: UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, countdownApplicationService: CountdownApplicationService(), userNotificationCenter: userNotificationCenter)
     }
     
-    init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), countdownNotificationBuilder: CountdownNotificationBuilding = CountdownNotificationBuilder(), defaults: UserDefaults = UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, countdownApplicationService: CountdownApplicationServiceProtocol = CountdownApplicationService(), userNotificationCenter: UNUserNotificationCenter? = nil) {
+    init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), countdownNotificationBuilder: CountdownNotificationBuilding = CountdownNotificationBuilder(), defaults: UserDefaults = UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, countdownApplicationService: CountdownApplicationServiceProtocol = CountdownApplicationService(), userNotificationCenter: UserNotificationCenter? = nil) {
         self.delegate = delegate
         self.countdownConfiguration = countdownConfiguration
         self.countdownNotificationBuilder = countdownNotificationBuilder
@@ -127,10 +127,8 @@ extension Countdown: Countdownable {
     public func skipRunningCountdown() {
         finishCountdown()
         
-        if let userNotificationCenter = userNotificationCenter {
-            // TODO: only remove the notification requests from this library, not the whole app ?!
-            userNotificationCenter.removeAllPendingNotificationRequests()
-        }
+        // TODO: only remove the notification requests from this library, not the whole app ?!
+        userNotificationCenter?.removeAllPendingNotificationRequests()
     }
     
     func startCountdown(with finishedDate: Date, with userNotificationContent: UNNotificationContent? = nil) {
@@ -159,7 +157,7 @@ extension Countdown: Countdownable {
                 return
             case .authorized, .provisional:
                 userNotificationCenter.removeAllPendingNotificationRequests()
-                userNotificationCenter.add(request)
+                userNotificationCenter.add(request, withCompletionHandler: nil)
             @unknown default:
                 return
             }

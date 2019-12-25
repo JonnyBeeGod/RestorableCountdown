@@ -1,4 +1,5 @@
 import XCTest
+import UserNotifications
 @testable import RestorableCountdown
 
 final class CountdownTests: XCTestCase {
@@ -144,19 +145,49 @@ final class CountdownTests: XCTestCase {
         timerDidFinishExpectation.expectedFulfillmentCount = 1
         let mockDelegate = MockCountdownDelegate()
         mockDelegate.timerDidFinishExpectation = timerDidFinishExpectation
-        let mockDefaults = MockUserDefaults()
-        let timer = Countdown(delegate: mockDelegate, defaults: mockDefaults)
+        let timer = Countdown(delegate: mockDelegate)
         
         XCTAssertNil(timer.currentRuntime())
         
-        timer.startCountdown(with: Date().addingTimeInterval(1))
+        let mockContent = UNMutableNotificationContent()
+        mockContent.title = "title"
+        mockContent.body = "body"
+        
+        timer.startCountdown(with: Date().addingTimeInterval(1), with: mockContent)
         XCTAssertNotNil(timer.currentRuntime())
         
         timer.skipRunningCountdown()
         XCTAssertNil(timer.currentRuntime())
         waitForExpectations(timeout: 1)
+    }
+    
+    func testNotificationsWithoutAuthorizationStatus() {
+        // map all authorizationStatus with expected Result
+        let authorizationStatusMap: [UNAuthorizationStatus: Int] = [.authorized: 1, .denied: 0, .notDetermined: 0, .provisional: 1]
+        UNNotificationSettings.swizzleAuthorizationStatus()
         
-        // TODO: also test notification. Since injecting of default center crashes skip for now
+        authorizationStatusMap.forEach { (key: UNAuthorizationStatus, value: Int) in
+            UNNotificationSettings.fakeAuthorizationStatus = key
+            
+            let mockCenter = UserNotificationCenterMock()
+            let mockCoder = MockNSCoder()
+            mockCenter.settingsCoder = mockCoder
+            let mockDelegate = MockCountdownDelegate()
+            let defaults = MockUserDefaults()
+            let timer = Countdown(delegate: mockDelegate, defaults: defaults, userNotificationCenter: mockCenter)
+            
+            XCTAssertEqual(mockCenter.pendingNotifications.count, 0)
+            
+            let mockContent = UNMutableNotificationContent()
+            mockContent.title = "title"
+            mockContent.body = "body"
+            
+            timer.startCountdown(with: Date().addingTimeInterval(1), with: mockContent)
+            XCTAssertEqual(mockCenter.pendingNotifications.count, value)
+            
+            timer.skipRunningCountdown()
+            XCTAssertEqual(mockCenter.pendingNotifications.count, 0)
+        }
     }
     
     func testInvalidateRestoreCountdown() {
@@ -196,17 +227,64 @@ final class CountdownTests: XCTestCase {
 }
 
 class MockCountdownDelegate: CountdownDelegate {
-    var timerDidFireExpectation: XCTestExpectation!
-    var timerDidFinishExpectation: XCTestExpectation!
+    var timerDidFireExpectation: XCTestExpectation?
+    var timerDidFinishExpectation: XCTestExpectation?
     
     func timerDidFire(with currentTime: DateComponents) {
-        timerDidFireExpectation.fulfill()
+        timerDidFireExpectation?.fulfill()
     }
     
     func timerDidFinish() {
-        timerDidFinishExpectation.fulfill()
+        timerDidFinishExpectation?.fulfill()
     }
 }
 
 class MockUserDefaults: UserDefaults {
+}
+
+extension UNNotificationSettings {
+    static var fakeAuthorizationStatus: UNAuthorizationStatus = .authorized
+    
+    static func swizzleAuthorizationStatus() {
+        let originalMethod = class_getInstanceMethod(self, #selector(getter: authorizationStatus))!
+        let swizzledMethod = class_getInstanceMethod(self, #selector(getter: swizzledAuthorizationStatus))!
+        
+        method_exchangeImplementations(originalMethod, swizzledMethod)
+    }
+    
+    @objc var swizzledAuthorizationStatus: UNAuthorizationStatus {
+        return Self.fakeAuthorizationStatus
+    }
+}
+
+class UserNotificationCenterMock: UserNotificationCenter {
+    
+    var pendingNotifications = [UNNotificationRequest]()
+    var settingsCoder = MockNSCoder()
+    
+    func getNotificationSettings(completionHandler: @escaping (UNNotificationSettings) -> Void) {
+        let settings = UNNotificationSettings(coder: settingsCoder)!
+        completionHandler(settings)
+    }
+    
+    func removeAllPendingNotificationRequests() {
+        pendingNotifications.removeAll()
+    }
+    
+    func add(_ request: UNNotificationRequest, withCompletionHandler completionHandler: ((Error?) -> Void)?) {
+        pendingNotifications.append(request)
+        completionHandler?(nil)
+    }
+}
+
+class MockNSCoder: NSCoder {
+    var authorizationStatus = UNAuthorizationStatus.authorized.rawValue
+    
+    override func decodeInt64(forKey key: String) -> Int64 {
+        return Int64(authorizationStatus)
+    }
+    
+    override func decodeBool(forKey key: String) -> Bool {
+        return true
+    }
 }
