@@ -168,9 +168,9 @@ final class CountdownTests: XCTestCase {
     func testNotificationsWithoutAuthorizationStatus() {
         // map all authorizationStatus with expected Result
         let authorizationStatusMap: [UNAuthorizationStatus: Int] = [.authorized: 1, .denied: 0, .notDetermined: 0, .provisional: 1]
+        UNNotificationSettings.swizzleAuthorizationStatus()
         
         authorizationStatusMap.forEach { (key: UNAuthorizationStatus, value: Int) in
-            UNNotificationSettings.swizzleAuthorizationStatus()
             UNNotificationSettings.fakeAuthorizationStatus = key
             
             let mockCenter = UserNotificationCenterMock()
