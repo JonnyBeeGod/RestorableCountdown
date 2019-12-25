@@ -236,6 +236,34 @@ final class CountdownTests: XCTestCase {
         XCTAssertNil(countdown.currentRuntime())
         XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
     }
+    
+    func testRestoreBeforeInvalidate() {
+        let mockDefaults = MockUserDefaults()
+        let configuration = CountdownConfiguration(minCountdownDuration: 0, defaultCountdownDuration: 1)
+        let countdown = Countdown(delegate: MockCountdownDelegate(), countdownConfiguration: configuration, defaults: mockDefaults)
+        
+        XCTAssertNil(countdown.currentRuntime())
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
+        countdown.restore()
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
+        XCTAssertNil(countdown.currentRuntime())
+        
+        countdown.startCountdown()
+        XCTAssertNotNil(countdown.currentRuntime())
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
+        
+        countdown.restore()
+        XCTAssertNotNil(countdown.currentRuntime())
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
+        
+        countdown.invalidate()
+        XCTAssertNotNil(countdown.currentRuntime())
+        XCTAssertNotNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
+        
+        countdown.restore()
+        XCTAssertNotNil(countdown.currentRuntime())
+        XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
+    }
 
     static var allTests = [
         ("testStartCountDownTimerDidFireItsCallbacks", testStartCountDownTimerDidFireItsCallbacks),
@@ -249,6 +277,7 @@ final class CountdownTests: XCTestCase {
         ("testSkipRunningCountdownTests", testSkipRunningCountdownTests),
         ("testNotifications", testNotifications),
         ("testInvalidateRestoreCountdown", testInvalidateRestoreCountdown),
+        ("testRestoreBeforeInvalidate", testRestoreBeforeInvalidate),
     ]
 }
 
