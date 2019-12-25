@@ -153,12 +153,10 @@ extension Countdown: Countdownable {
         
         userNotificationCenter.getNotificationSettings { (settings) in
             switch settings.authorizationStatus {
-            case .denied, .notDetermined:
-                return
-            case .authorized, .provisional:
+                case .authorized, .provisional:
                 userNotificationCenter.removeAllPendingNotificationRequests()
                 userNotificationCenter.add(request, withCompletionHandler: nil)
-            @unknown default:
+            default:
                 return
             }
         }
