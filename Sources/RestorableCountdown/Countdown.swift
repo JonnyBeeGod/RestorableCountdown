@@ -173,16 +173,12 @@ extension Countdown: Countdownable {
     
     @objc
     private func timerTick() {
-        guard let finishedDate = finishedDate, let calculateDateComponentsForCurrentTime = calculateDateComponentsForCurrentTime() else {
+        guard let finishedDate = finishedDate, Date() < finishedDate, let calculateDateComponentsForCurrentTime = calculateDateComponentsForCurrentTime() else {
             finishCountdown()
             return
         }
         
-        if Date() > finishedDate {
-            finishCountdown()
-        } else {
-            delegate?.timerDidFire(with: calculateDateComponentsForCurrentTime)
-        }
+        delegate?.timerDidFire(with: calculateDateComponentsForCurrentTime)
     }
     
     private func finishCountdown() {
