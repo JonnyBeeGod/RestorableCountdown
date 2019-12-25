@@ -49,12 +49,36 @@ final class CountdownTests: XCTestCase {
         waitForExpectations(timeout: 2, handler: nil)
     }
     
+    func testStartCountDown3TimerDidFireItsCallbacks() {
+        var timerDidFireExpectation: XCTestExpectation!
+        var timerDidFinishExpectation: XCTestExpectation!
+        
+        timerDidFireExpectation = self.expectation(description: "timerDidFire")
+        timerDidFireExpectation.expectedFulfillmentCount = 5 // at least 10 time fired combined because 2 tests start countdowns
+        timerDidFireExpectation.assertForOverFulfill = false
+        
+        timerDidFinishExpectation = self.expectation(description: "timerDidFinish")
+        timerDidFireExpectation.expectedFulfillmentCount = 1 // exactly 2 times fired combined because 2 tests start the countdowns
+        timerDidFinishExpectation.assertForOverFulfill = true
+        
+        let mockDelegate = MockCountdownDelegate()
+        mockDelegate.timerDidFinishExpectation = timerDidFinishExpectation
+        mockDelegate.timerDidFireExpectation = timerDidFireExpectation
+        
+        let configuration = CountdownConfiguration(minCountdownDuration: 0, defaultCountdownDuration: 1)
+        let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, defaults: MockUserDefaults())
+        timer.startCountdown()
+        
+        waitForExpectations(timeout: 2, handler: nil)
+    }
+    
     func testcurrentRuntime() {
         let mockDelegate = MockCountdownDelegate()
-        let timer = Countdown(delegate: mockDelegate, defaults: MockUserDefaults())
+        let configuration = CountdownConfiguration(minCountdownDuration: 0, defaultCountdownDuration: 2)
+        let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, defaults: MockUserDefaults())
         
         XCTAssertNil(timer.currentRuntime())
-        timer.startCountdown(with: Date().addingTimeInterval(2))
+        timer.startCountdown()
         XCTAssertNotNil(timer.currentRuntime())
         
         guard let runtime = timer.currentRuntime() else {
@@ -161,7 +185,7 @@ final class CountdownTests: XCTestCase {
         waitForExpectations(timeout: 1)
     }
     
-    func testNotificationsWithoutAuthorizationStatus() {
+    func testNotifications() {
         // map all authorizationStatus with expected Result
         let authorizationStatusMap: [UNAuthorizationStatus: Int] = [.authorized: 1, .denied: 0, .notDetermined: 0, .provisional: 1]
         UNNotificationSettings.swizzleAuthorizationStatus()
@@ -216,12 +240,14 @@ final class CountdownTests: XCTestCase {
     static var allTests = [
         ("testStartCountDownTimerDidFireItsCallbacks", testStartCountDownTimerDidFireItsCallbacks),
         ("testStartCountDown2TimerDidFireItsCallbacks", testStartCountDown2TimerDidFireItsCallbacks),
+        ("testStartCountDown3TimerDidFireItsCallbacks", testStartCountDown2TimerDidFireItsCallbacks),
         ("testcurrentRuntime", testcurrentRuntime),
         ("testIncreaseCountdownTime", testIncreaseCountdownTime),
         ("testIncreaseCountdownTimeOverMaxTime", testIncreaseCountdownTimeOverMaxTime),
         ("testDecreaseCountdownTime", testDecreaseCountdownTime),
         ("testDecreaseCountdownTimeOverZero", testDecreaseCountdownTimeOverZero),
         ("testSkipRunningCountdownTests", testSkipRunningCountdownTests),
+        ("testNotifications", testNotifications),
         ("testInvalidateRestoreCountdown", testInvalidateRestoreCountdown),
     ]
 }
