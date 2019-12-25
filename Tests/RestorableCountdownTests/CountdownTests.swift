@@ -145,10 +145,8 @@ final class CountdownTests: XCTestCase {
         timerDidFinishExpectation.expectedFulfillmentCount = 1
         let mockDelegate = MockCountdownDelegate()
         mockDelegate.timerDidFinishExpectation = timerDidFinishExpectation
-        let mockNotificationCenter = UserNotificationCenterMock()
-        let timer = Countdown(delegate: mockDelegate, userNotificationCenter: mockNotificationCenter)
+        let timer = Countdown(delegate: mockDelegate)
         
-        XCTAssertEqual(mockNotificationCenter.pendingNotifications.count, 0)
         XCTAssertNil(timer.currentRuntime())
         
         let mockContent = UNMutableNotificationContent()
@@ -157,12 +155,10 @@ final class CountdownTests: XCTestCase {
         
         timer.startCountdown(with: Date().addingTimeInterval(1), with: mockContent)
         XCTAssertNotNil(timer.currentRuntime())
-        XCTAssertEqual(mockNotificationCenter.pendingNotifications.count, 1)
         
         timer.skipRunningCountdown()
         XCTAssertNil(timer.currentRuntime())
         waitForExpectations(timeout: 1)
-        XCTAssertEqual(mockNotificationCenter.pendingNotifications.count, 0)
     }
     
     func testNotificationsWithoutAuthorizationStatus() {
