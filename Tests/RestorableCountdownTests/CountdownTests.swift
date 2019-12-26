@@ -181,14 +181,14 @@ final class CountdownTests: XCTestCase {
         mockDelegate.timerDidFinishExpectation = timerDidFinishExpectation
         mockDelegate.timerDidFireExpectation = timerDidFireExpectation
         
-        let configuration = CountdownConfiguration(fireInterval: 0.05, maxCountdownDuration: 1, minCountdownDuration: 0, defaultCountdownDuration: 0.5)
-        let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration)
-        
         let mockContent = UNMutableNotificationContent()
         mockContent.title = "title"
         mockContent.body = "body"
         
-        timer.startCountdown(with: Date().addingTimeInterval(1), with: mockContent)
+        let configuration = CountdownConfiguration(fireInterval: 0.05, maxCountdownDuration: 1, minCountdownDuration: 0, defaultCountdownDuration: 0.5)
+        let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, notificationContent: mockContent)
+        
+        timer.startCountdown(with: Date().addingTimeInterval(1))
         wait(for: [timerDidFireExpectation], timeout: 1)
         
         timer.skipRunningCountdown()
@@ -208,15 +208,16 @@ final class CountdownTests: XCTestCase {
             mockCenter.settingsCoder = mockCoder
             let mockDelegate = MockCountdownDelegate()
             let defaults = MockUserDefaults()
-            let timer = Countdown(delegate: mockDelegate, defaults: defaults, userNotificationCenter: mockCenter)
-            
-            XCTAssertEqual(mockCenter.pendingNotifications.count, 0)
             
             let mockContent = UNMutableNotificationContent()
             mockContent.title = "title"
             mockContent.body = "body"
             
-            timer.startCountdown(with: Date().addingTimeInterval(1), with: mockContent)
+            let timer = Countdown(delegate: mockDelegate, defaults: defaults, userNotificationCenter: mockCenter, notificationContent: mockContent)
+            
+            XCTAssertEqual(mockCenter.pendingNotifications.count, 0)
+            
+            timer.startCountdown(with: Date().addingTimeInterval(1))
             XCTAssertEqual(mockCenter.pendingNotifications.count, value)
             
             timer.skipRunningCountdown()
