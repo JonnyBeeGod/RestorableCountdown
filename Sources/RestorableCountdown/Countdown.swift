@@ -12,6 +12,8 @@ protocol CountdownBackgroundRestorable: class {
 }
 
 public protocol Countdownable: class {
+    var delegate: CountdownDelegate? { get set }
+    
     func startCountdown()
     
     func currentRuntime() -> DateComponents?
