@@ -17,10 +17,12 @@ extension DateComponents {
         let hours = Int(timeinterval / 60 / 60) % 24
         let minutes = Int(timeinterval / 60) % 60
         let seconds = Int(timeinterval) % 60
+        let nanoseconds = Int(timeinterval.truncatingRemainder(dividingBy: 1) * 1000 * 1000 * 1000)
         result.day = days
         result.hour = hours
         result.minute = minutes
         result.second = seconds
+        result.nanosecond = nanoseconds
         return result
     }
     
@@ -28,12 +30,13 @@ extension DateComponents {
     ///
     /// since this method is agnostic of Date and Calendar, it is only possible to calculate up to days, not months.
     func timeInterval() -> TimeInterval {
-        let seconds = (self.second ?? 0)
-        let minutes = (self.minute ?? 0) * 60
-        let hours = (self.hour ?? 0) * 60 * 60
-        let days = (self.day ?? 0) * 60 * 60 * 24
+        let nanoseconds = Double(self.nanosecond ?? 0) / 1000.0 / 1000.0 / 1000.0
+        let seconds = Double(self.second ?? 0)
+        let minutes = Double(self.minute ?? 0) * 60
+        let hours = Double(self.hour ?? 0) * 60 * 60
+        let days = Double(self.day ?? 0) * 60 * 60 * 24
         
-        return TimeInterval(Double(seconds + minutes + hours + days))
+        return TimeInterval(nanoseconds + seconds + minutes + hours + days)
     }
 }
 

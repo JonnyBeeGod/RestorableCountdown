@@ -184,11 +184,12 @@ extension Countdown: Countdownable {
     }
     
     private func calculateDateComponentsForCurrentTime() -> DateComponents? {
-        guard let finishedDate = finishedDate, finishedDate.compare(Date()) != .orderedAscending else {
+        let currentFinishedDate = finishedDate ?? Date().addingTimeInterval(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue))
+        guard currentFinishedDate.compare(Date()) != .orderedAscending else {
             return nil
         }
         
-        let interval = finishedDate.timeIntervalSince(Date())
+        let interval = currentFinishedDate.timeIntervalSince(Date())
         return DateComponents.dateComponents(for: interval)
     }
     
