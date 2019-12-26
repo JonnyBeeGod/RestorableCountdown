@@ -99,28 +99,23 @@ extension Countdown: Countdownable {
     }
     
     public func increaseTime(by seconds: TimeInterval) {
-        let currentSavedDefaultCountdownRuntime = defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
-        let increasedRuntime = currentSavedDefaultCountdownRuntime + seconds
-        
-        guard increasedRuntime <=  countdownConfiguration.maxCountdownDuration else {
-            return
-        }
-        
-        finishedDate = finishedDate?.addingTimeInterval(seconds)
-        defaults.set(increasedRuntime, forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
-        scheduleLocalNotification()
+        increaseOrDecreaseTime(increase: true, by: seconds)
     }
     
     public func decreaseTime(by seconds: TimeInterval) {
+        increaseOrDecreaseTime(increase: false, by: seconds)
+    }
+    
+    private func increaseOrDecreaseTime(increase: Bool, by seconds: TimeInterval) {
         let currentSavedDefaultCountdownRuntime = defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
-        let decreasedRuntime = currentSavedDefaultCountdownRuntime - seconds
+        let mutatedRuntime = increase ? currentSavedDefaultCountdownRuntime + seconds : currentSavedDefaultCountdownRuntime - seconds
         
-        guard decreasedRuntime >= countdownConfiguration.minCountdownDuration else {
+        guard mutatedRuntime >= countdownConfiguration.minCountdownDuration && mutatedRuntime <= countdownConfiguration.maxCountdownDuration else {
             return
         }
         
-        finishedDate = finishedDate?.addingTimeInterval(-seconds)
-        defaults.set(decreasedRuntime, forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
+        finishedDate = finishedDate?.addingTimeInterval(increase ? seconds : -seconds)
+        defaults.set(mutatedRuntime, forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
         scheduleLocalNotification()
     }
     
