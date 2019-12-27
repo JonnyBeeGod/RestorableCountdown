@@ -86,11 +86,9 @@ final class CountdownTests: XCTestCase {
         expectedResult.minute = 0
         expectedResult.second = 3
         expectedResult.nanosecond = 0
-        XCTAssertEqual(timer.timeToFinish()?.year, expectedResult.year)
         XCTAssertEqual(timer.timeToFinish()?.hour, expectedResult.hour)
         XCTAssertEqual(timer.timeToFinish()?.minute, expectedResult.minute)
-        XCTAssertEqual(timer.timeToFinish()?.second, expectedResult.second)
-        XCTAssertEqual(timer.timeToFinish()?.nanosecond, expectedResult.nanosecond)
+        XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.1)
         
         timer.startCountdown()
         XCTAssertNotNil(timer.timeToFinish())
