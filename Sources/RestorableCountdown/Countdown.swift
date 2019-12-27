@@ -50,7 +50,6 @@ public class Countdown: CountdownBackgroundRestorable {
     private var countdownDuration: TimeInterval
     private let countdownNotificationBuilder: CountdownNotificationBuilding
     
-    private let defaults: UserDefaults
     private var countdownApplicationService: CountdownApplicationServiceProtocol
     
     /// the injected UNUserNotificationCenter if you want to use local notifications for your timer
@@ -60,15 +59,14 @@ public class Countdown: CountdownBackgroundRestorable {
     private var notificationContent: UNNotificationContent?
     
     public convenience init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), userNotificationCenter: UNUserNotificationCenter? = nil, notificationContent: UNNotificationContent? = nil) {
-        self.init(delegate: delegate, countdownConfiguration: countdownConfiguration, defaults: UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, countdownApplicationService: CountdownApplicationService(), userNotificationCenter: userNotificationCenter, notificationContent: notificationContent)
+        self.init(delegate: delegate, countdownConfiguration: countdownConfiguration, countdownApplicationService: CountdownApplicationService(), userNotificationCenter: userNotificationCenter, notificationContent: notificationContent)
     }
     
-    init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), countdownNotificationBuilder: CountdownNotificationBuilding = CountdownNotificationBuilder(), defaults: UserDefaults = UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, countdownApplicationService: CountdownApplicationServiceProtocol = CountdownApplicationService(), userNotificationCenter: UserNotificationCenter? = nil, notificationContent: UNNotificationContent? = nil) {
+    init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), countdownNotificationBuilder: CountdownNotificationBuilding = CountdownNotificationBuilder(), countdownApplicationService: CountdownApplicationServiceProtocol = CountdownApplicationService(), userNotificationCenter: UserNotificationCenter? = nil, notificationContent: UNNotificationContent? = nil) {
         self.delegate = delegate
         self.countdownConfiguration = countdownConfiguration
         self.countdownDuration = countdownConfiguration.countdownDuration
         self.countdownNotificationBuilder = countdownNotificationBuilder
-        self.defaults = defaults
         self.countdownApplicationService = countdownApplicationService
         self.userNotificationCenter = userNotificationCenter
         self.notificationContent = notificationContent
@@ -77,20 +75,14 @@ public class Countdown: CountdownBackgroundRestorable {
     
     func invalidate() {
         timer?.invalidate()
-        defaults.set(finishedDate, forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue)
     }
     
     func restore() {
-        guard let finishedDate = defaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue) as? Date else {
+        guard let finishedDate = finishedDate else {
             return
         }
         
         startCountdown(with: finishedDate)
-        cleanupSavedFinishedDate()
-    }
-    
-    private func cleanupSavedFinishedDate() {
-        defaults.set(nil, forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue)
     }
 }
 
@@ -188,7 +180,6 @@ extension Countdown: Countdownable {
         delegate?.timerDidFinish()
         finishedDate = nil
         
-        cleanupSavedFinishedDate()
         countdownApplicationService.deregister()
     }
     
