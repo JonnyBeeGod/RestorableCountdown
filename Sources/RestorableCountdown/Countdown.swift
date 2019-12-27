@@ -19,7 +19,7 @@ public protocol Countdownable: class {
     /// returns the current time of the countdown until it is finished
     ///
     /// on a countdown that has not been started yet this is the same as `totalRunTime`. After that it is the `totalRunTime`- the elapsed time since starting the countdown
-    func timeToFinish() -> DateComponents?
+    func timeToFinish() -> DateComponents
     
     /// returns the total runtime of the countdown
     ///
@@ -46,10 +46,10 @@ public class Countdown: CountdownBackgroundRestorable {
     private var finishedDate: Date?
     private var timer: Timer?
     
-    private let countdownConfiguration: CountdownConfiguration
+    private let countdownConfiguration: CountdownConfigurable
+    private var countdownDuration: TimeInterval
     private let countdownNotificationBuilder: CountdownNotificationBuilding
     
-    private let defaults: UserDefaults
     private var countdownApplicationService: CountdownApplicationServiceProtocol
     
     /// the injected UNUserNotificationCenter if you want to use local notifications for your timer
@@ -58,43 +58,31 @@ public class Countdown: CountdownBackgroundRestorable {
     private let userNotificationCenter: UserNotificationCenter?
     private var notificationContent: UNNotificationContent?
     
-    public convenience init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), userNotificationCenter: UNUserNotificationCenter? = nil, notificationContent: UNNotificationContent? = nil) {
-        self.init(delegate: delegate, countdownConfiguration: countdownConfiguration, defaults: UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, countdownApplicationService: CountdownApplicationService(), userNotificationCenter: userNotificationCenter, notificationContent: notificationContent)
+    public convenience init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfigurable = CountdownConfiguration(), userNotificationCenter: UNUserNotificationCenter? = nil, notificationContent: UNNotificationContent? = nil) {
+        self.init(delegate: delegate, countdownConfiguration: countdownConfiguration, countdownApplicationService: CountdownApplicationService(), userNotificationCenter: userNotificationCenter, notificationContent: notificationContent)
     }
     
-    init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), countdownNotificationBuilder: CountdownNotificationBuilding = CountdownNotificationBuilder(), defaults: UserDefaults = UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, countdownApplicationService: CountdownApplicationServiceProtocol = CountdownApplicationService(), userNotificationCenter: UserNotificationCenter? = nil, notificationContent: UNNotificationContent? = nil) {
+    init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfigurable = CountdownConfiguration(), countdownNotificationBuilder: CountdownNotificationBuilding = CountdownNotificationBuilder(), countdownApplicationService: CountdownApplicationServiceProtocol = CountdownApplicationService(), userNotificationCenter: UserNotificationCenter? = nil, notificationContent: UNNotificationContent? = nil) {
         self.delegate = delegate
         self.countdownConfiguration = countdownConfiguration
+        self.countdownDuration = countdownConfiguration.countdownDuration
         self.countdownNotificationBuilder = countdownNotificationBuilder
-        self.defaults = defaults
         self.countdownApplicationService = countdownApplicationService
         self.userNotificationCenter = userNotificationCenter
         self.notificationContent = notificationContent
         self.countdownApplicationService.countdown = self
-        
-        persistCountdownRuntime(configuration: countdownConfiguration)
     }
     
     func invalidate() {
         timer?.invalidate()
-        defaults.set(finishedDate, forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue)
     }
     
     func restore() {
-        guard let finishedDate = defaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue) as? Date else {
+        guard let finishedDate = finishedDate else {
             return
         }
         
         startCountdown(with: finishedDate)
-        cleanupSavedFinishedDate()
-    }
-    
-    private func persistCountdownRuntime(configuration: CountdownConfiguration) {
-        defaults.set(configuration.countdownDuration, forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
-    }
-    
-    private func cleanupSavedFinishedDate() {
-        defaults.set(nil, forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue)
     }
 }
 
@@ -105,13 +93,12 @@ extension Countdown: Countdownable {
         startCountdown(with: calculatedDate)
     }
     
-    public func timeToFinish() -> DateComponents? {
+    public func timeToFinish() -> DateComponents {
         return calculateDateComponentsForCurrentTime()
     }
     
     public func totalRunTime() -> DateComponents? {
-        let savedRunTime = defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
-        return DateComponents.dateComponents(for: savedRunTime)
+        return DateComponents.dateComponents(for: countdownDuration)
     }
     
     public func increaseTime(by seconds: TimeInterval) {
@@ -123,15 +110,14 @@ extension Countdown: Countdownable {
     }
     
     private func increaseOrDecreaseTime(increase: Bool, by seconds: TimeInterval) {
-        let currentSavedDefaultCountdownRuntime = defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
-        let mutatedRuntime = increase ? currentSavedDefaultCountdownRuntime + seconds : currentSavedDefaultCountdownRuntime - seconds
+        let mutatedRuntime = increase ? countdownDuration + seconds : countdownDuration - seconds
         
         guard mutatedRuntime >= countdownConfiguration.minCountdownDuration && mutatedRuntime <= countdownConfiguration.maxCountdownDuration else {
             return
         }
         
         finishedDate = finishedDate?.addingTimeInterval(increase ? seconds : -seconds)
-        defaults.set(mutatedRuntime, forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
+        countdownDuration = mutatedRuntime
         scheduleLocalNotification()
     }
     
@@ -148,10 +134,6 @@ extension Countdown: Countdownable {
         configureAndStartTimer()
         scheduleLocalNotification()
         countdownApplicationService.register()
-    }
-    
-    func startCountdown(with length: DateComponents) {
-        startCountdown(with: calculateDate(for: length))
     }
     
     private func scheduleLocalNotification() {
@@ -181,12 +163,12 @@ extension Countdown: Countdownable {
     
     @objc
     private func timerTick() {
-        guard let finishedDate = finishedDate, Date() < finishedDate, let calculateDateComponentsForCurrentTime = calculateDateComponentsForCurrentTime() else {
+        guard let finishedDate = finishedDate, Date() < finishedDate else {
             finishCountdown()
             return
         }
         
-        delegate?.timerDidFire(with: calculateDateComponentsForCurrentTime)
+        delegate?.timerDidFire(with: calculateDateComponentsForCurrentTime())
     }
     
     private func finishCountdown() {
@@ -194,21 +176,17 @@ extension Countdown: Countdownable {
         delegate?.timerDidFinish()
         finishedDate = nil
         
-        cleanupSavedFinishedDate()
         countdownApplicationService.deregister()
     }
     
-    private func calculateDateComponentsForCurrentTime() -> DateComponents? {
-        let currentFinishedDate = finishedDate ?? Date().addingTimeInterval(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue))
-        guard currentFinishedDate.compare(Date()) != .orderedAscending else {
-            return nil
+    private func calculateDateComponentsForCurrentTime() -> DateComponents {
+        let now = Date()
+        let currentFinishedDate = finishedDate ?? now.addingTimeInterval(countdownDuration)
+        guard currentFinishedDate.compare(now) != .orderedAscending else {
+            return DateComponents()
         }
         
-        let interval = currentFinishedDate.timeIntervalSince(Date())
+        let interval = currentFinishedDate.timeIntervalSince(now)
         return DateComponents.dateComponents(for: interval)
-    }
-    
-    private func calculateDate(for length: DateComponents) -> Date {
-        return Date().addingTimeInterval(length.timeInterval())
     }
 }

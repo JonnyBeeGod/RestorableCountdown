@@ -7,7 +7,15 @@
 
 import Foundation
 
-public struct CountdownConfiguration {
+public protocol CountdownConfigurable {
+    var fireInterval: TimeInterval { get }
+    var tolerance: Double { get }
+    var maxCountdownDuration: TimeInterval { get }
+    var minCountdownDuration: TimeInterval { get }
+    var countdownDuration: TimeInterval { get }
+}
+
+public struct CountdownConfiguration: CountdownConfigurable {
     public let fireInterval: TimeInterval
     public let tolerance: Double
     public let maxCountdownDuration: TimeInterval

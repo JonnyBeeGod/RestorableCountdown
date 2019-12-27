@@ -16,7 +16,7 @@ class CountdownApplicationServiceTests: XCTestCase {
     
     func testRegister() {
         countdownApplicationService = CountdownApplicationService(notificationCenter: mockNotificationCenter)
-        countdownRestorable = MockCountdownRestorable(delegate: MockCountdownDelegate(), defaults: MockUserDefaults(), countdownApplicationService: countdownApplicationService)
+        countdownRestorable = MockCountdownRestorable(delegate: MockCountdownDelegate(), countdownApplicationService: countdownApplicationService)
         
         countdownApplicationService.register()
         
@@ -38,7 +38,7 @@ class CountdownApplicationServiceTests: XCTestCase {
     
     func testDeregister() {
         countdownApplicationService = CountdownApplicationService(notificationCenter: mockNotificationCenter)
-        countdownRestorable = MockCountdownRestorable(delegate: MockCountdownDelegate(), defaults: MockUserDefaults(), countdownApplicationService: countdownApplicationService)
+        countdownRestorable = MockCountdownRestorable(delegate: MockCountdownDelegate(), countdownApplicationService: countdownApplicationService)
         
         countdownApplicationService.register()
         
