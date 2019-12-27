@@ -46,7 +46,7 @@ public class Countdown: CountdownBackgroundRestorable {
     private var finishedDate: Date?
     private var timer: Timer?
     
-    private let countdownConfiguration: CountdownConfiguration
+    private let countdownConfiguration: CountdownConfigurable
     private var countdownDuration: TimeInterval
     private let countdownNotificationBuilder: CountdownNotificationBuilding
     
@@ -58,11 +58,11 @@ public class Countdown: CountdownBackgroundRestorable {
     private let userNotificationCenter: UserNotificationCenter?
     private var notificationContent: UNNotificationContent?
     
-    public convenience init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), userNotificationCenter: UNUserNotificationCenter? = nil, notificationContent: UNNotificationContent? = nil) {
+    public convenience init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfigurable = CountdownConfiguration(), userNotificationCenter: UNUserNotificationCenter? = nil, notificationContent: UNNotificationContent? = nil) {
         self.init(delegate: delegate, countdownConfiguration: countdownConfiguration, countdownApplicationService: CountdownApplicationService(), userNotificationCenter: userNotificationCenter, notificationContent: notificationContent)
     }
     
-    init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), countdownNotificationBuilder: CountdownNotificationBuilding = CountdownNotificationBuilder(), countdownApplicationService: CountdownApplicationServiceProtocol = CountdownApplicationService(), userNotificationCenter: UserNotificationCenter? = nil, notificationContent: UNNotificationContent? = nil) {
+    init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfigurable = CountdownConfiguration(), countdownNotificationBuilder: CountdownNotificationBuilding = CountdownNotificationBuilder(), countdownApplicationService: CountdownApplicationServiceProtocol = CountdownApplicationService(), userNotificationCenter: UserNotificationCenter? = nil, notificationContent: UNNotificationContent? = nil) {
         self.delegate = delegate
         self.countdownConfiguration = countdownConfiguration
         self.countdownDuration = countdownConfiguration.countdownDuration

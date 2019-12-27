@@ -84,8 +84,22 @@ final class CountdownTests: XCTestCase {
         XCTAssertEqual(timer.timeToFinish().minute, 0)
         XCTAssertTrue(timer.timeToFinish().second == 2 && Int(timer.timeToFinish().nanosecond ?? 0) > 999 || timer.timeToFinish().second == 3 && Int(timer.timeToFinish().nanosecond ?? 0) < 1000) // microsecond accuracy for nanoseconds
         
-        let timer2 = Countdown(delegate: mockDelegate, countdownConfiguration: configuration)
-        timer2.startCountdown(with: Date.distantPast)
+        let configuration2 = MockCountdownConfiguration()
+        let timer2 = Countdown(delegate: mockDelegate, countdownConfiguration: configuration2)
+        
+        XCTAssertNil(timer2.timeToFinish().day)
+        XCTAssertNil(timer2.timeToFinish().hour)
+        XCTAssertNil(timer2.timeToFinish().minute)
+        XCTAssertNil(timer2.timeToFinish().second)
+        XCTAssertNil(timer2.timeToFinish().nanosecond)
+        
+        timer2.startCountdown()
+        
+        XCTAssertNil(timer2.timeToFinish().day)
+        XCTAssertNil(timer2.timeToFinish().hour)
+        XCTAssertNil(timer2.timeToFinish().minute)
+        XCTAssertNil(timer2.timeToFinish().second)
+        XCTAssertNil(timer2.timeToFinish().nanosecond)
     }
     
     func testTotalRunTime() {
@@ -336,6 +350,30 @@ final class CountdownTests: XCTestCase {
         ("testRestoreBeforeInvalidate", testRestoreBeforeInvalidate),
         ("testTotalRunTime", testTotalRunTime),
     ]
+}
+
+struct MockCountdownConfiguration: CountdownConfigurable {
+    var fireInterval: TimeInterval {
+        return 0.1
+    }
+    
+    var tolerance: Double {
+        return 0.01
+    }
+    
+    var maxCountdownDuration: TimeInterval {
+        return 2
+    }
+    
+    var minCountdownDuration: TimeInterval {
+        return 0
+    }
+    
+    var countdownDuration: TimeInterval {
+        return -2
+    }
+    
+    
 }
 
 class MockCountdownDelegate: CountdownDelegate {
