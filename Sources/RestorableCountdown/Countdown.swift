@@ -19,7 +19,7 @@ public protocol Countdownable: class {
     /// returns the current time of the countdown until it is finished
     ///
     /// on a countdown that has not been started yet this is the same as `totalRunTime`. After that it is the `totalRunTime`- the elapsed time since starting the countdown
-    func timeToFinish() -> DateComponents?
+    func timeToFinish() -> DateComponents
     
     /// returns the total runtime of the countdown
     ///
@@ -93,7 +93,7 @@ extension Countdown: Countdownable {
         startCountdown(with: calculatedDate)
     }
     
-    public func timeToFinish() -> DateComponents? {
+    public func timeToFinish() -> DateComponents {
         return calculateDateComponentsForCurrentTime()
     }
     
@@ -163,12 +163,12 @@ extension Countdown: Countdownable {
     
     @objc
     private func timerTick() {
-        guard let finishedDate = finishedDate, Date() < finishedDate, let calculateDateComponentsForCurrentTime = calculateDateComponentsForCurrentTime() else {
+        guard let finishedDate = finishedDate, Date() < finishedDate else {
             finishCountdown()
             return
         }
         
-        delegate?.timerDidFire(with: calculateDateComponentsForCurrentTime)
+        delegate?.timerDidFire(with: calculateDateComponentsForCurrentTime())
     }
     
     private func finishCountdown() {
@@ -179,11 +179,11 @@ extension Countdown: Countdownable {
         countdownApplicationService.deregister()
     }
     
-    private func calculateDateComponentsForCurrentTime() -> DateComponents? {
+    private func calculateDateComponentsForCurrentTime() -> DateComponents {
         let now = Date()
         let currentFinishedDate = finishedDate ?? now.addingTimeInterval(countdownDuration)
         guard currentFinishedDate.compare(now) != .orderedAscending else {
-            return nil
+            return DateComponents()
         }
         
         let interval = currentFinishedDate.timeIntervalSince(now)
