@@ -72,7 +72,7 @@ final class CountdownTests: XCTestCase {
         waitForExpectations(timeout: 2, handler: nil)
     }
     
-    func testcurrentRuntime() {
+    func testCurrentRuntime() {
         let mockDelegate = MockCountdownDelegate()
         let configuration = CountdownConfiguration(minCountdownDuration: 0, defaultCountdownDuration: 3)
         let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, defaults: MockUserDefaults())
@@ -84,18 +84,20 @@ final class CountdownTests: XCTestCase {
         var expectedResult = DateComponents()
         expectedResult.hour = 0
         expectedResult.minute = 0
-        expectedResult.second = 2
+        expectedResult.second = 3
+        expectedResult.nanosecond = 0
         XCTAssertEqual(timer.timeToFinish()?.year, expectedResult.year)
         XCTAssertEqual(timer.timeToFinish()?.hour, expectedResult.hour)
         XCTAssertEqual(timer.timeToFinish()?.minute, expectedResult.minute)
         XCTAssertEqual(timer.timeToFinish()?.second, expectedResult.second)
-        XCTAssertNotNil(timer.timeToFinish()?.nanosecond)
-        XCTAssertTrue(timer.timeToFinish()?.nanosecond ?? 0 > 999)
+        XCTAssertEqual(timer.timeToFinish()?.nanosecond, expectedResult.nanosecond)
         
         timer.startCountdown()
         XCTAssertNotNil(timer.timeToFinish())
         
-        XCTAssertEqual(Double(runtime.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        expectedResult.second = 2
+        XCTAssertEqual(Double(runtime.second ?? 0), Double(expectedResult.second ?? 0))
+        XCTAssertTrue(Double(runtime.nanosecond ?? 0) > 9999)
     }
     
     func testTotalRunTime() {
@@ -176,11 +178,9 @@ final class CountdownTests: XCTestCase {
         var expectedResult = DateComponents()
         expectedResult.second = 1
         
-        XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 1)
         XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
         
         timer.increaseTime(by: 3)
-        XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 1)
         XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
     }
     
@@ -211,16 +211,13 @@ final class CountdownTests: XCTestCase {
         expectedResult.second = 3
         
         XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
-        XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 10)
         
         timer.decreaseTime(by: 200)
         XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
-        XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 10)
         
         timer.decreaseTime(by: 2)
         expectedResult.second = 1
         XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
-        XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 8)
     }
     
     func testSkipRunningCountdownTests() {
@@ -326,7 +323,7 @@ final class CountdownTests: XCTestCase {
         ("testStartCountDownTimerDidFireItsCallbacks", testStartCountDownTimerDidFireItsCallbacks),
         ("testStartCountDown2TimerDidFireItsCallbacks", testStartCountDown2TimerDidFireItsCallbacks),
         ("testStartCountDown3TimerDidFireItsCallbacks", testStartCountDown2TimerDidFireItsCallbacks),
-        ("testcurrentRuntime", testcurrentRuntime),
+        ("testCurrentRuntime", testCurrentRuntime),
         ("testIncreaseCountdownTime", testIncreaseCountdownTime),
         ("testIncreaseCountdownTimeOverMaxTime", testIncreaseCountdownTimeOverMaxTime),
         ("testDecreaseCountdownTime", testDecreaseCountdownTime),

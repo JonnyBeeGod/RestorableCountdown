@@ -47,6 +47,7 @@ public class Countdown: CountdownBackgroundRestorable {
     private var timer: Timer?
     
     private let countdownConfiguration: CountdownConfiguration
+    private var countdownDuration: TimeInterval
     private let countdownNotificationBuilder: CountdownNotificationBuilding
     
     private let defaults: UserDefaults
@@ -65,14 +66,13 @@ public class Countdown: CountdownBackgroundRestorable {
     init(delegate: CountdownDelegate? = nil, countdownConfiguration: CountdownConfiguration = CountdownConfiguration(), countdownNotificationBuilder: CountdownNotificationBuilding = CountdownNotificationBuilder(), defaults: UserDefaults = UserDefaults(suiteName: UserDefaultsConstants.suiteName.rawValue) ?? .standard, countdownApplicationService: CountdownApplicationServiceProtocol = CountdownApplicationService(), userNotificationCenter: UserNotificationCenter? = nil, notificationContent: UNNotificationContent? = nil) {
         self.delegate = delegate
         self.countdownConfiguration = countdownConfiguration
+        self.countdownDuration = countdownConfiguration.countdownDuration
         self.countdownNotificationBuilder = countdownNotificationBuilder
         self.defaults = defaults
         self.countdownApplicationService = countdownApplicationService
         self.userNotificationCenter = userNotificationCenter
         self.notificationContent = notificationContent
         self.countdownApplicationService.countdown = self
-        
-        persistCountdownRuntime(configuration: countdownConfiguration)
     }
     
     func invalidate() {
@@ -87,10 +87,6 @@ public class Countdown: CountdownBackgroundRestorable {
         
         startCountdown(with: finishedDate)
         cleanupSavedFinishedDate()
-    }
-    
-    private func persistCountdownRuntime(configuration: CountdownConfiguration) {
-        defaults.set(configuration.countdownDuration, forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
     }
     
     private func cleanupSavedFinishedDate() {
@@ -110,8 +106,7 @@ extension Countdown: Countdownable {
     }
     
     public func totalRunTime() -> DateComponents? {
-        let savedRunTime = defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
-        return DateComponents.dateComponents(for: savedRunTime)
+        return DateComponents.dateComponents(for: countdownDuration)
     }
     
     public func increaseTime(by seconds: TimeInterval) {
@@ -123,15 +118,14 @@ extension Countdown: Countdownable {
     }
     
     private func increaseOrDecreaseTime(increase: Bool, by seconds: TimeInterval) {
-        let currentSavedDefaultCountdownRuntime = defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
-        let mutatedRuntime = increase ? currentSavedDefaultCountdownRuntime + seconds : currentSavedDefaultCountdownRuntime - seconds
+        let mutatedRuntime = increase ? countdownDuration + seconds : countdownDuration - seconds
         
         guard mutatedRuntime >= countdownConfiguration.minCountdownDuration && mutatedRuntime <= countdownConfiguration.maxCountdownDuration else {
             return
         }
         
         finishedDate = finishedDate?.addingTimeInterval(increase ? seconds : -seconds)
-        defaults.set(mutatedRuntime, forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
+        countdownDuration = mutatedRuntime
         scheduleLocalNotification()
     }
     
@@ -199,7 +193,7 @@ extension Countdown: Countdownable {
     }
     
     private func calculateDateComponentsForCurrentTime() -> DateComponents? {
-        let currentFinishedDate = finishedDate ?? Date().addingTimeInterval(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue))
+        let currentFinishedDate = finishedDate ?? Date().addingTimeInterval(countdownDuration)
         guard currentFinishedDate.compare(Date()) != .orderedAscending else {
             return nil
         }
