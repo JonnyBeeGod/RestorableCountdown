@@ -112,39 +112,40 @@ final class CountdownTests: XCTestCase {
         
         timer.startCountdown()
         
-        if let nanoseconds = timer.totalRunTime()?.nanosecond {
-            XCTAssertTrue(nanoseconds > 9999)
-        } else {
-            XCTFail()
-        }
-        
-        XCTAssertEqual(timer.totalRunTime()?.second, 1)
+        XCTAssertEqual(timer.totalRunTime()?.nanosecond, 0)
+        XCTAssertEqual(timer.totalRunTime()?.second, 2)
         XCTAssertEqual(timer.totalRunTime()?.minute, 0)
         XCTAssertEqual(timer.totalRunTime()?.hour, 0)
         XCTAssertEqual(timer.totalRunTime()?.day, 0)
         
         timer.increaseTime(by: 3)
         
-        if let nanoseconds = timer.totalRunTime()?.nanosecond {
-            XCTAssertTrue(nanoseconds > 9999)
-        } else {
-            XCTFail()
-        }
-        
-        XCTAssertEqual(timer.totalRunTime()?.second, 4)
+        XCTAssertEqual(timer.totalRunTime()?.nanosecond, 0)
+        XCTAssertEqual(timer.totalRunTime()?.second, 5)
         XCTAssertEqual(timer.totalRunTime()?.minute, 0)
         XCTAssertEqual(timer.totalRunTime()?.hour, 0)
         XCTAssertEqual(timer.totalRunTime()?.day, 0)
         
         timer.decreaseTime(by: 1)
         
-        if let nanoseconds = timer.totalRunTime()?.nanosecond {
-            XCTAssertTrue(nanoseconds > 9999)
-        } else {
-            XCTFail()
-        }
+        XCTAssertEqual(timer.totalRunTime()?.nanosecond, 0)
+        XCTAssertEqual(timer.totalRunTime()?.second, 4)
+        XCTAssertEqual(timer.totalRunTime()?.minute, 0)
+        XCTAssertEqual(timer.totalRunTime()?.hour, 0)
+        XCTAssertEqual(timer.totalRunTime()?.day, 0)
         
-        XCTAssertEqual(timer.totalRunTime()?.second, 3)
+        timer.decreaseTime(by: 2)
+        
+        XCTAssertEqual(timer.totalRunTime()?.nanosecond, 0)
+        XCTAssertEqual(timer.totalRunTime()?.second, 2)
+        XCTAssertEqual(timer.totalRunTime()?.minute, 0)
+        XCTAssertEqual(timer.totalRunTime()?.hour, 0)
+        XCTAssertEqual(timer.totalRunTime()?.day, 0)
+        
+        timer.skipRunningCountdown()
+        
+        XCTAssertEqual(timer.totalRunTime()?.nanosecond, 0)
+        XCTAssertEqual(timer.totalRunTime()?.second, 2)
         XCTAssertEqual(timer.totalRunTime()?.minute, 0)
         XCTAssertEqual(timer.totalRunTime()?.hour, 0)
         XCTAssertEqual(timer.totalRunTime()?.day, 0)

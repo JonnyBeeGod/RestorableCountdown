@@ -110,7 +110,8 @@ extension Countdown: Countdownable {
     }
     
     public func totalRunTime() -> DateComponents? {
-        return nil
+        let savedRunTime = defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue)
+        return DateComponents.dateComponents(for: savedRunTime)
     }
     
     public func increaseTime(by seconds: TimeInterval) {
