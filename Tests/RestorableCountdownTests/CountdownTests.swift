@@ -308,7 +308,7 @@ final class CountdownTests: XCTestCase {
         delegate.timerDidFireExpectation = timerDidFireExpectation
         delegate.timerDidFinishExpectation = timerDidFinishExpectation
         
-        let configuration = CountdownConfiguration(minCountdownDuration: 0, defaultCountdownDuration: 0.3)
+        let configuration = CountdownConfiguration(minCountdownDuration: 0, defaultCountdownDuration: 1)
         let countdown = Countdown(delegate: delegate, countdownConfiguration: configuration)
         
         countdown.restore()
@@ -325,8 +325,8 @@ final class CountdownTests: XCTestCase {
         
         countdown.restore()
         XCTAssertNotNil(countdown.timeToFinish())
-        wait(for: [timerDidFireExpectation], timeout: 0.2)
-        wait(for: [timerDidFinishExpectation], timeout: 0.5)
+        wait(for: [timerDidFireExpectation], timeout: 0.5)
+        wait(for: [timerDidFinishExpectation], timeout: 1.5)
     }
 
     static var allTests = [
