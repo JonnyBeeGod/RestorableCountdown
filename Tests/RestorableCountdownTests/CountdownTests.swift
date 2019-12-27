@@ -85,7 +85,6 @@ final class CountdownTests: XCTestCase {
         expectedResult.hour = 0
         expectedResult.minute = 0
         expectedResult.second = 3
-        expectedResult.nanosecond = 0
         XCTAssertEqual(timer.timeToFinish()?.hour, expectedResult.hour)
         XCTAssertEqual(timer.timeToFinish()?.minute, expectedResult.minute)
         XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.1)
@@ -95,7 +94,6 @@ final class CountdownTests: XCTestCase {
         
         expectedResult.second = 2
         XCTAssertEqual(Double(runtime.second ?? 0), Double(expectedResult.second ?? 0))
-        XCTAssertTrue(Double(runtime.nanosecond ?? 0) > 9999)
     }
     
     func testTotalRunTime() {
