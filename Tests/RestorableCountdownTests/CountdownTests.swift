@@ -79,13 +79,13 @@ final class CountdownTests: XCTestCase {
         
         XCTAssertEqual(timer.timeToFinish()?.hour, 0)
         XCTAssertEqual(timer.timeToFinish()?.minute, 0)
-        XCTAssertTrue(timer.timeToFinish()?.second == 2 && Int(timer.timeToFinish()?.nanosecond ?? 0) > 999 || timer.timeToFinish()?.second == 3 && Int(timer.timeToFinish()?.nanosecond ?? 0) < 1000) // depending on accuracy
+        XCTAssertTrue(timer.timeToFinish()?.second == 2 || timer.timeToFinish()?.second == 3) // depending on accuracy
         
         timer.startCountdown()
         
         XCTAssertEqual(timer.timeToFinish()?.hour, 0)
         XCTAssertEqual(timer.timeToFinish()?.minute, 0)
-        XCTAssertTrue(timer.timeToFinish()?.second == 2 && Int(timer.timeToFinish()?.nanosecond ?? 0) > 999 || timer.timeToFinish()?.second == 3 && Int(timer.timeToFinish()?.nanosecond ?? 0) < 1000) // depending on accuracy
+        XCTAssertTrue(timer.timeToFinish()?.second == 2 || timer.timeToFinish()?.second == 3) // depending on accuracy
     }
     
     func testTotalRunTime() {
