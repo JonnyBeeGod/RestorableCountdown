@@ -15,7 +15,7 @@ public struct CountdownConfiguration {
     public let countdownDuration: TimeInterval
     
     public init(fireInterval: TimeInterval = 0.1, tolerance: Double = 0.05, maxCountdownDuration: TimeInterval = 30 * 60, minCountdownDuration: TimeInterval = 15, defaultCountdownDuration: TimeInterval = 90) {
-        assert(minCountdownDuration < defaultCountdownDuration && defaultCountdownDuration < maxCountdownDuration, "invalid input. make sure your countdownDuration is between min and max duration")
+        assert(minCountdownDuration <= defaultCountdownDuration && defaultCountdownDuration <= maxCountdownDuration, "invalid input. make sure your countdownDuration is between min and max duration")
         self.fireInterval = fireInterval
         self.tolerance = tolerance
         self.maxCountdownDuration = maxCountdownDuration
