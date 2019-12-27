@@ -17,6 +17,7 @@ class DateComponentsTests: XCTestCase {
         superShortExpectedResult.hour = 0
         superShortExpectedResult.minute = 0
         superShortExpectedResult.second = 0
+        superShortExpectedResult.nanosecond = 283764
         
         XCTAssertEqual(DateComponents.dateComponents(for: superShort), superShortExpectedResult)
     }
@@ -28,6 +29,7 @@ class DateComponentsTests: XCTestCase {
         longExpectedResult.hour = 14
         longExpectedResult.minute = 51
         longExpectedResult.second = 13
+        longExpectedResult.nanosecond = 0
         
         XCTAssertEqual(DateComponents.dateComponents(for: long), longExpectedResult)
     }
@@ -39,6 +41,7 @@ class DateComponentsTests: XCTestCase {
         superLongExpectedResult.hour = 14
         superLongExpectedResult.minute = 51
         superLongExpectedResult.second = 13
+        superLongExpectedResult.nanosecond = 0
         
         XCTAssertEqual(DateComponents.dateComponents(for: long), superLongExpectedResult)
     }
@@ -81,6 +84,19 @@ class DateComponentsTests: XCTestCase {
         XCTAssertEqual(components.timeInterval(), TimeInterval(exactly: expectedTimeInterval))
     }
     
+    func testTimeIntervalIncludeNanoseconds() {
+        var components = DateComponents()
+        components.day = 0
+        components.hour = 11
+        components.minute = 23
+        components.second = 0
+        components.nanosecond = 89675
+        
+        let expectedTimeInterval = 0.000089675 + 1380 + 39600
+        
+        XCTAssertEqual(components.timeInterval(), TimeInterval(exactly: expectedTimeInterval))
+    }
+    
     static var allTests = [
         ("testDateComponentsForTimeIntervalShort", testDateComponentsForTimeIntervalShort),
         ("testDateComponentsForTimeIntervalLong", testDateComponentsForTimeIntervalLong),
@@ -88,6 +104,7 @@ class DateComponentsTests: XCTestCase {
         ("testTimeInterval", testTimeInterval),
         ("testTimeInterval2", testTimeInterval2),
         ("testTimeIntervalDisregardingMonthYear", testTimeIntervalDisregardingMonthYear),
+        ("testTimeIntervalIncludeNanoseconds", testTimeIntervalIncludeNanoseconds),
     ]
 
 }
