@@ -81,16 +81,22 @@ final class CountdownTests: XCTestCase {
             XCTFail("timer should have a run time")
             return
         }
+        
         var expectedResult = DateComponents()
         expectedResult.hour = 0
         expectedResult.minute = 0
         expectedResult.second = 3
         XCTAssertEqual(timer.timeToFinish()?.hour, expectedResult.hour)
         XCTAssertEqual(timer.timeToFinish()?.minute, expectedResult.minute)
-        XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.1)
+        XCTAssertTrue(timer.timeToFinish()?.second == 2 && Int(timer.timeToFinish()?.nanosecond ?? 0) > 999 || timer.timeToFinish()?.second == 3 && Int(timer.timeToFinish()?.nanosecond ?? 0) == 0) // depending on accuracy. Since this is Int we can not test for accuracy
         
         timer.startCountdown()
-        XCTAssertNotNil(timer.timeToFinish())
+        expectedResult.second = 2
+        
+        XCTAssertEqual(timer.timeToFinish()?.hour, expectedResult.hour)
+        XCTAssertEqual(timer.timeToFinish()?.minute, expectedResult.minute)
+        XCTAssertEqual(timer.timeToFinish()?.second, expectedResult.second)
+        XCTAssertTrue(Double(timer.timeToFinish()?.nanosecond ?? 0) > 999)
         
         expectedResult.second = 2
         XCTAssertEqual(Double(runtime.second ?? 0), Double(expectedResult.second ?? 0))
