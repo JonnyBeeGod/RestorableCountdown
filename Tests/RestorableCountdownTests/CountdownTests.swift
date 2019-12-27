@@ -77,7 +77,7 @@ final class CountdownTests: XCTestCase {
         let configuration = CountdownConfiguration(minCountdownDuration: 0, defaultCountdownDuration: 3)
         let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, defaults: MockUserDefaults())
         
-        guard let runtime = timer.currentRuntime() else {
+        guard let runtime = timer.timeToFinish() else {
             XCTFail("timer should have a run time")
             return
         }
@@ -85,17 +85,69 @@ final class CountdownTests: XCTestCase {
         expectedResult.hour = 0
         expectedResult.minute = 0
         expectedResult.second = 2
-        XCTAssertEqual(timer.currentRuntime()?.year, expectedResult.year)
-        XCTAssertEqual(timer.currentRuntime()?.hour, expectedResult.hour)
-        XCTAssertEqual(timer.currentRuntime()?.minute, expectedResult.minute)
-        XCTAssertEqual(timer.currentRuntime()?.second, expectedResult.second)
-        XCTAssertNotNil(timer.currentRuntime()?.nanosecond)
-        XCTAssertTrue(timer.currentRuntime()?.nanosecond ?? 0 > 999)
+        XCTAssertEqual(timer.timeToFinish()?.year, expectedResult.year)
+        XCTAssertEqual(timer.timeToFinish()?.hour, expectedResult.hour)
+        XCTAssertEqual(timer.timeToFinish()?.minute, expectedResult.minute)
+        XCTAssertEqual(timer.timeToFinish()?.second, expectedResult.second)
+        XCTAssertNotNil(timer.timeToFinish()?.nanosecond)
+        XCTAssertTrue(timer.timeToFinish()?.nanosecond ?? 0 > 999)
         
         timer.startCountdown()
-        XCTAssertNotNil(timer.currentRuntime())
+        XCTAssertNotNil(timer.timeToFinish())
         
         XCTAssertEqual(Double(runtime.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+    }
+    
+    func testTotalRunTime() {
+        let mockDelegate = MockCountdownDelegate()
+        let defaults = MockUserDefaults()
+        let configuration = CountdownConfiguration(maxCountdownDuration: 10, minCountdownDuration: 0, defaultCountdownDuration: 2)
+        let timer = Countdown(delegate: mockDelegate, countdownConfiguration: configuration, defaults: defaults)
+        
+        XCTAssertEqual(timer.totalRunTime()?.nanosecond, 0)
+        XCTAssertEqual(timer.totalRunTime()?.second, 2)
+        XCTAssertEqual(timer.totalRunTime()?.minute, 0)
+        XCTAssertEqual(timer.totalRunTime()?.hour, 0)
+        XCTAssertEqual(timer.totalRunTime()?.day, 0)
+        
+        timer.startCountdown()
+        
+        if let nanoseconds = timer.totalRunTime()?.nanosecond {
+            XCTAssertTrue(nanoseconds > 9999)
+        } else {
+            XCTFail()
+        }
+        
+        XCTAssertEqual(timer.totalRunTime()?.second, 1)
+        XCTAssertEqual(timer.totalRunTime()?.minute, 0)
+        XCTAssertEqual(timer.totalRunTime()?.hour, 0)
+        XCTAssertEqual(timer.totalRunTime()?.day, 0)
+        
+        timer.increaseTime(by: 3)
+        
+        if let nanoseconds = timer.totalRunTime()?.nanosecond {
+            XCTAssertTrue(nanoseconds > 9999)
+        } else {
+            XCTFail()
+        }
+        
+        XCTAssertEqual(timer.totalRunTime()?.second, 4)
+        XCTAssertEqual(timer.totalRunTime()?.minute, 0)
+        XCTAssertEqual(timer.totalRunTime()?.hour, 0)
+        XCTAssertEqual(timer.totalRunTime()?.day, 0)
+        
+        timer.decreaseTime(by: 1)
+        
+        if let nanoseconds = timer.totalRunTime()?.nanosecond {
+            XCTAssertTrue(nanoseconds > 9999)
+        } else {
+            XCTFail()
+        }
+        
+        XCTAssertEqual(timer.totalRunTime()?.second, 3)
+        XCTAssertEqual(timer.totalRunTime()?.minute, 0)
+        XCTAssertEqual(timer.totalRunTime()?.hour, 0)
+        XCTAssertEqual(timer.totalRunTime()?.day, 0)
     }
     
     func testIncreaseCountdownTime() {
@@ -106,11 +158,11 @@ final class CountdownTests: XCTestCase {
         var expectedResult = DateComponents()
         expectedResult.second = 1
         
-        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
         
         timer.increaseTime(by: 3)
         expectedResult.second = 4
-        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
     }
     
     func testIncreaseCountdownTimeOverMaxTime() {
@@ -124,11 +176,11 @@ final class CountdownTests: XCTestCase {
         expectedResult.second = 1
         
         XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 1)
-        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
         
         timer.increaseTime(by: 3)
         XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 1)
-        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
     }
     
     func testDecreaseCountdownTime() {
@@ -140,11 +192,11 @@ final class CountdownTests: XCTestCase {
         var expectedResult = DateComponents()
         expectedResult.second = 3
         
-        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
         
         timer.decreaseTime(by: 2)
         expectedResult.second = 1
-        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
     }
     
     func testDecreaseCountdownTimeOverZero() {
@@ -157,16 +209,16 @@ final class CountdownTests: XCTestCase {
         var expectedResult = DateComponents()
         expectedResult.second = 3
         
-        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
         XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 10)
         
         timer.decreaseTime(by: 200)
-        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
         XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 10)
         
         timer.decreaseTime(by: 2)
         expectedResult.second = 1
-        XCTAssertEqual(Double(timer.currentRuntime()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
+        XCTAssertEqual(Double(timer.timeToFinish()?.second ?? 0), Double(expectedResult.second ?? 0), accuracy: 0.05)
         XCTAssertEqual(defaults.double(forKey: UserDefaultsConstants.currentSavedDefaultCountdownRuntime.rawValue), 8)
     }
     
@@ -232,15 +284,15 @@ final class CountdownTests: XCTestCase {
         XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
         
         countdown.startCountdown(with: Date.distantFuture)
-        XCTAssertNotNil(countdown.currentRuntime())
+        XCTAssertNotNil(countdown.timeToFinish())
         XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
         
         countdown.invalidate()
-        XCTAssertNotNil(countdown.currentRuntime())
+        XCTAssertNotNil(countdown.timeToFinish())
         XCTAssertNotNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
         
         countdown.restore()
-        XCTAssertNotNil(countdown.currentRuntime())
+        XCTAssertNotNil(countdown.timeToFinish())
         XCTAssertNil(mockDefaults.value(forKey: UserDefaultsConstants.countdownSavedFinishedDate.rawValue))
         
         countdown.skipRunningCountdown()
@@ -282,6 +334,7 @@ final class CountdownTests: XCTestCase {
         ("testNotifications", testNotifications),
         ("testInvalidateRestoreCountdown", testInvalidateRestoreCountdown),
         ("testRestoreBeforeInvalidate", testRestoreBeforeInvalidate),
+        ("testTotalRunTime", testTotalRunTime),
     ]
 }
 

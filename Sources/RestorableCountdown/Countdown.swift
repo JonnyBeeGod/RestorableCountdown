@@ -16,7 +16,15 @@ public protocol Countdownable: class {
     
     func startCountdown()
     
-    func currentRuntime() -> DateComponents?
+    /// returns the current time of the countdown until it is finished
+    ///
+    /// on a countdown that has not been started yet this is the same as `totalRunTime`. After that it is the `totalRunTime`- the elapsed time since starting the countdown
+    func timeToFinish() -> DateComponents?
+    
+    /// returns the total runtime of the countdown
+    ///
+    /// this takes any increases or decreases of the runtime into account
+    func totalRunTime() -> DateComponents?
     
     /// increases the duration of the countdown by the supplied number of seconds
     ///
@@ -97,8 +105,12 @@ extension Countdown: Countdownable {
         startCountdown(with: calculatedDate)
     }
     
-    public func currentRuntime() -> DateComponents? {
+    public func timeToFinish() -> DateComponents? {
         return calculateDateComponentsForCurrentTime()
+    }
+    
+    public func totalRunTime() -> DateComponents? {
+        return nil
     }
     
     public func increaseTime(by seconds: TimeInterval) {
