@@ -41,11 +41,8 @@ final class CountdownTests: XCTestCase {
         mockDelegate.timerDidFinishExpectation = timerDidFinishExpectation
         mockDelegate.timerDidFireExpectation = timerDidFireExpectation
         
-        let timer = Countdown(delegate: mockDelegate)
-        
-        var components = DateComponents()
-        components.second = 1
-        timer.startCountdown(with: components)
+        let timer = Countdown(delegate: mockDelegate, countdownConfiguration: CountdownConfiguration(minCountdownDuration: 0, defaultCountdownDuration: 1))
+        timer.startCountdown()
         waitForExpectations(timeout: 2, handler: nil)
     }
     

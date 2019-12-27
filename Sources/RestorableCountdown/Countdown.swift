@@ -136,10 +136,6 @@ extension Countdown: Countdownable {
         countdownApplicationService.register()
     }
     
-    func startCountdown(with length: DateComponents) {
-        startCountdown(with: calculateDate(for: length))
-    }
-    
     private func scheduleLocalNotification() {
         guard let notificationContent = notificationContent, let userNotificationCenter = userNotificationCenter, let finishedDate = finishedDate else {
             return
@@ -184,16 +180,13 @@ extension Countdown: Countdownable {
     }
     
     private func calculateDateComponentsForCurrentTime() -> DateComponents? {
-        let currentFinishedDate = finishedDate ?? Date().addingTimeInterval(countdownDuration)
-        guard currentFinishedDate.compare(Date()) != .orderedAscending else {
+        let now = Date()
+        let currentFinishedDate = finishedDate ?? now.addingTimeInterval(countdownDuration)
+        guard currentFinishedDate.compare(now) != .orderedAscending else {
             return nil
         }
         
-        let interval = currentFinishedDate.timeIntervalSince(Date())
+        let interval = currentFinishedDate.timeIntervalSince(now)
         return DateComponents.dateComponents(for: interval)
-    }
-    
-    private func calculateDate(for length: DateComponents) -> Date {
-        return Date().addingTimeInterval(length.timeInterval())
     }
 }
