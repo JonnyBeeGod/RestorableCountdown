@@ -87,19 +87,19 @@ final class CountdownTests: XCTestCase {
         let configuration2 = MockCountdownConfiguration()
         let timer2 = Countdown(delegate: mockDelegate, countdownConfiguration: configuration2)
         
-        XCTAssertNil(timer2.timeToFinish().day)
-        XCTAssertNil(timer2.timeToFinish().hour)
-        XCTAssertNil(timer2.timeToFinish().minute)
-        XCTAssertNil(timer2.timeToFinish().second)
-        XCTAssertNil(timer2.timeToFinish().nanosecond)
+        XCTAssertEqual(timer2.timeToFinish().day, 0)
+        XCTAssertEqual(timer2.timeToFinish().hour, 0)
+        XCTAssertEqual(timer2.timeToFinish().minute, 0)
+        XCTAssertEqual(timer2.timeToFinish().second, 0)
+        XCTAssertEqual(timer2.timeToFinish().nanosecond, 0)
         
         timer2.startCountdown()
         
-        XCTAssertNil(timer2.timeToFinish().day)
-        XCTAssertNil(timer2.timeToFinish().hour)
-        XCTAssertNil(timer2.timeToFinish().minute)
-        XCTAssertNil(timer2.timeToFinish().second)
-        XCTAssertNil(timer2.timeToFinish().nanosecond)
+        XCTAssertEqual(timer2.timeToFinish().day, 0)
+        XCTAssertEqual(timer2.timeToFinish().hour, 0)
+        XCTAssertEqual(timer2.timeToFinish().minute, 0)
+        XCTAssertEqual(timer2.timeToFinish().second, 0)
+        XCTAssertEqual(timer2.timeToFinish().nanosecond, 0)
     }
     
     func testTotalRunTime() {

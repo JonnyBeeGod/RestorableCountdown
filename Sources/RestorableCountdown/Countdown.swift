@@ -190,7 +190,13 @@ extension Countdown: Countdownable {
         let now = Date()
         let currentFinishedDate = finishedDate ?? now.addingTimeInterval(countdownDuration)
         guard currentFinishedDate.compare(now) != .orderedAscending else {
-            return DateComponents()
+            var result = DateComponents()
+            result.day = 0
+            result.hour = 0
+            result.minute = 0
+            result.second = 0
+            result.nanosecond = 0
+            return result
         }
         
         let interval = currentFinishedDate.timeIntervalSince(now)
