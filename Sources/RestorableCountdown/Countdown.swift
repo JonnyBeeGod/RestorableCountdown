@@ -14,6 +14,9 @@ protocol CountdownBackgroundRestorable: class {
 public protocol Countdownable: class {
     var delegate: CountdownDelegate? { get set }
     
+    /// starts the countdown with the configuration injected in `init`
+    ///
+    /// starts the countdown only once. If you want to start a running countdown again you need to initialize a new Countdownable instance
     func startCountdown()
     
     /// returns the current time of the countdown until it is finished
@@ -129,6 +132,10 @@ extension Countdown: Countdownable {
     }
     
     func startCountdown(with finishedDate: Date) {
+        if let timer = timer, timer.isValid {
+            return
+        }
+        
         self.finishedDate = finishedDate
         
         configureAndStartTimer()

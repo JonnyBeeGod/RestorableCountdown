@@ -334,6 +334,20 @@ final class CountdownTests: XCTestCase {
         wait(for: [timerDidFireExpectation], timeout: 0.5)
         wait(for: [timerDidFinishExpectation], timeout: 1.5)
     }
+    
+    func testNotStartedCountdownIsInvalid() {
+        let timerDidFireExpectation = self.expectation(description: "timerDidFire")
+        timerDidFireExpectation.expectedFulfillmentCount = 1
+        timerDidFireExpectation.isInverted = true
+        let delegate = MockCountdownDelegate()
+        delegate.timerDidFireExpectation = timerDidFireExpectation
+        
+        let configuration = CountdownConfiguration(minCountdownDuration: 0, defaultCountdownDuration: 1)
+        let countdown = Countdown(delegate: delegate, countdownConfiguration: configuration)
+        
+        wait(for: [timerDidFireExpectation], timeout: 0.3)
+        countdown.skipRunningCountdown()
+    }
 
     static var allTests = [
         ("testStartCountDownTimerDidFireItsCallbacks", testStartCountDownTimerDidFireItsCallbacks),
@@ -349,6 +363,7 @@ final class CountdownTests: XCTestCase {
         ("testInvalidateRestoreCountdown", testInvalidateRestoreCountdown),
         ("testRestoreBeforeInvalidate", testRestoreBeforeInvalidate),
         ("testTotalRunTime", testTotalRunTime),
+        ("testNotStartedCountdownIsInvalid", testNotStartedCountdownIsInvalid),
     ]
 }
 
