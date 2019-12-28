@@ -87,19 +87,19 @@ final class CountdownTests: XCTestCase {
         let configuration2 = MockCountdownConfiguration()
         let timer2 = Countdown(delegate: mockDelegate, countdownConfiguration: configuration2)
         
-        XCTAssertNil(timer2.timeToFinish().day)
-        XCTAssertNil(timer2.timeToFinish().hour)
-        XCTAssertNil(timer2.timeToFinish().minute)
-        XCTAssertNil(timer2.timeToFinish().second)
-        XCTAssertNil(timer2.timeToFinish().nanosecond)
+        XCTAssertEqual(timer2.timeToFinish().day, 0)
+        XCTAssertEqual(timer2.timeToFinish().hour, 0)
+        XCTAssertEqual(timer2.timeToFinish().minute, 0)
+        XCTAssertEqual(timer2.timeToFinish().second, 0)
+        XCTAssertEqual(timer2.timeToFinish().nanosecond, 0)
         
         timer2.startCountdown()
         
-        XCTAssertNil(timer2.timeToFinish().day)
-        XCTAssertNil(timer2.timeToFinish().hour)
-        XCTAssertNil(timer2.timeToFinish().minute)
-        XCTAssertNil(timer2.timeToFinish().second)
-        XCTAssertNil(timer2.timeToFinish().nanosecond)
+        XCTAssertEqual(timer2.timeToFinish().day, 0)
+        XCTAssertEqual(timer2.timeToFinish().hour, 0)
+        XCTAssertEqual(timer2.timeToFinish().minute, 0)
+        XCTAssertEqual(timer2.timeToFinish().second, 0)
+        XCTAssertEqual(timer2.timeToFinish().nanosecond, 0)
     }
     
     func testTotalRunTime() {
@@ -334,6 +334,20 @@ final class CountdownTests: XCTestCase {
         wait(for: [timerDidFireExpectation], timeout: 0.5)
         wait(for: [timerDidFinishExpectation], timeout: 1.5)
     }
+    
+    func testNotStartedCountdownIsInvalid() {
+        let timerDidFireExpectation = self.expectation(description: "timerDidFire")
+        timerDidFireExpectation.expectedFulfillmentCount = 1
+        timerDidFireExpectation.isInverted = true
+        let delegate = MockCountdownDelegate()
+        delegate.timerDidFireExpectation = timerDidFireExpectation
+        
+        let configuration = CountdownConfiguration(minCountdownDuration: 0, defaultCountdownDuration: 1)
+        let countdown = Countdown(delegate: delegate, countdownConfiguration: configuration)
+        
+        wait(for: [timerDidFireExpectation], timeout: 0.3)
+        countdown.skipRunningCountdown()
+    }
 
     static var allTests = [
         ("testStartCountDownTimerDidFireItsCallbacks", testStartCountDownTimerDidFireItsCallbacks),
@@ -349,6 +363,7 @@ final class CountdownTests: XCTestCase {
         ("testInvalidateRestoreCountdown", testInvalidateRestoreCountdown),
         ("testRestoreBeforeInvalidate", testRestoreBeforeInvalidate),
         ("testTotalRunTime", testTotalRunTime),
+        ("testNotStartedCountdownIsInvalid", testNotStartedCountdownIsInvalid),
     ]
 }
 
