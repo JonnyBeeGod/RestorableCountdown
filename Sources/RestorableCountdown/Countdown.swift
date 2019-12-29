@@ -17,7 +17,9 @@ public protocol Countdownable: class {
     /// starts the countdown with the configuration injected in `init`
     ///
     /// starts the countdown only once. If you want to start a running countdown again you need to initialize a new Countdownable instance
-    func startCountdown()
+    /// - returns: the `finishedDate` of the countdown
+    @discardableResult
+    func startCountdown() -> Date
     
     /// returns the current time of the countdown until it is finished
     ///
@@ -91,9 +93,11 @@ public class Countdown: CountdownBackgroundRestorable {
 
 extension Countdown: Countdownable {
     
-    public func startCountdown() {
+    @discardableResult
+    public func startCountdown() -> Date {
         let calculatedDate = Date().addingTimeInterval(countdownConfiguration.countdownDuration)
         startCountdown(with: calculatedDate)
+        return calculatedDate
     }
     
     public func timeToFinish() -> DateComponents {
