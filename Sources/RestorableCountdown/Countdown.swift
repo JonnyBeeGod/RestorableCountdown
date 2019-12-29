@@ -29,7 +29,7 @@ public protocol Countdownable: class {
     /// returns the total runtime of the countdown
     ///
     /// this takes any increases or decreases of the runtime into account
-    func totalRunTime() -> DateComponents?
+    func totalRunTime() -> DateComponents
     
     /// increases the duration of the countdown by the supplied number of seconds
     ///
@@ -104,7 +104,7 @@ extension Countdown: Countdownable {
         return calculateDateComponentsForCurrentTime()
     }
     
-    public func totalRunTime() -> DateComponents? {
+    public func totalRunTime() -> DateComponents {
         return DateComponents.dateComponents(for: countdownDuration)
     }
     
