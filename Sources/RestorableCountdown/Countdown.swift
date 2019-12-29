@@ -17,7 +17,9 @@ public protocol Countdownable: class {
     /// starts the countdown with the configuration injected in `init`
     ///
     /// starts the countdown only once. If you want to start a running countdown again you need to initialize a new Countdownable instance
-    func startCountdown()
+    /// - returns: the `finishedDate` of the countdown
+    @discardableResult
+    func startCountdown() -> Date
     
     /// returns the current time of the countdown until it is finished
     ///
@@ -27,17 +29,21 @@ public protocol Countdownable: class {
     /// returns the total runtime of the countdown
     ///
     /// this takes any increases or decreases of the runtime into account
-    func totalRunTime() -> DateComponents?
+    func totalRunTime() -> DateComponents
     
     /// increases the duration of the countdown by the supplied number of seconds
     ///
     /// if the supplied number of `seconds` added on the current countdown duration exceeds  `countdownConfiguration.maxCountdownDuration`, this method returns without increasing time
-    func increaseTime(by seconds: TimeInterval)
+    /// - returns: the `finishedDate` of the countdown
+    @discardableResult
+    func increaseTime(by seconds: TimeInterval) -> Date?
     
     /// decreases the duration of the countdown by the supplied number of seconds
     ///
     /// if the current remaining `seconds` of the countdown are smaller than the supplied number of seconds, this method just returns without decreasing the time
-    func decreaseTime(by seconds: TimeInterval)
+    /// - returns: the `finishedDate` of the countdown
+    @discardableResult
+    func decreaseTime(by seconds: TimeInterval) -> Date?
     
     func skipRunningCountdown()
 }
@@ -91,25 +97,31 @@ public class Countdown: CountdownBackgroundRestorable {
 
 extension Countdown: Countdownable {
     
-    public func startCountdown() {
+    @discardableResult
+    public func startCountdown() -> Date {
         let calculatedDate = Date().addingTimeInterval(countdownConfiguration.countdownDuration)
         startCountdown(with: calculatedDate)
+        return calculatedDate
     }
     
     public func timeToFinish() -> DateComponents {
         return calculateDateComponentsForCurrentTime()
     }
     
-    public func totalRunTime() -> DateComponents? {
+    public func totalRunTime() -> DateComponents {
         return DateComponents.dateComponents(for: countdownDuration)
     }
     
-    public func increaseTime(by seconds: TimeInterval) {
+    @discardableResult
+    public func increaseTime(by seconds: TimeInterval) -> Date? {
         increaseOrDecreaseTime(increase: true, by: seconds)
+        return finishedDate
     }
     
-    public func decreaseTime(by seconds: TimeInterval) {
+    @discardableResult
+    public func decreaseTime(by seconds: TimeInterval) -> Date? {
         increaseOrDecreaseTime(increase: false, by: seconds)
+        return finishedDate
     }
     
     private func increaseOrDecreaseTime(increase: Bool, by seconds: TimeInterval) {

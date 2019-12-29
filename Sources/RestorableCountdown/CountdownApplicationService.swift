@@ -30,7 +30,8 @@ class CountdownApplicationService: CountdownApplicationServiceProtocol {
     }
     
     func register() {
-        #if canImport(UIKit)
+        #if os(watchOS)
+        #elseif canImport(UIKit)
         notificationCenter.addObserver(self, selector: #selector(willResignActive), name: UIApplication.willResignActiveNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(didBecomeActive), name: UIApplication.didBecomeActiveNotification, object: nil)
         #elseif canImport(AppKit)
@@ -40,7 +41,8 @@ class CountdownApplicationService: CountdownApplicationServiceProtocol {
     }
     
     func deregister() {
-        #if canImport(UIKit)
+        #if os(watchOS)
+        #elseif canImport(UIKit)
         notificationCenter.removeObserver(self, name: UIApplication.willResignActiveNotification, object: nil)
         notificationCenter.removeObserver(self, name: UIApplication.didBecomeActiveNotification, object: nil)
         #elseif canImport(AppKit)
