@@ -34,12 +34,16 @@ public protocol Countdownable: class {
     /// increases the duration of the countdown by the supplied number of seconds
     ///
     /// if the supplied number of `seconds` added on the current countdown duration exceeds  `countdownConfiguration.maxCountdownDuration`, this method returns without increasing time
-    func increaseTime(by seconds: TimeInterval)
+    /// - returns: the `finishedDate` of the countdown
+    @discardableResult
+    func increaseTime(by seconds: TimeInterval) -> Date?
     
     /// decreases the duration of the countdown by the supplied number of seconds
     ///
     /// if the current remaining `seconds` of the countdown are smaller than the supplied number of seconds, this method just returns without decreasing the time
-    func decreaseTime(by seconds: TimeInterval)
+    /// - returns: the `finishedDate` of the countdown
+    @discardableResult
+    func decreaseTime(by seconds: TimeInterval) -> Date?
     
     func skipRunningCountdown()
 }
@@ -108,12 +112,16 @@ extension Countdown: Countdownable {
         return DateComponents.dateComponents(for: countdownDuration)
     }
     
-    public func increaseTime(by seconds: TimeInterval) {
+    @discardableResult
+    public func increaseTime(by seconds: TimeInterval) -> Date? {
         increaseOrDecreaseTime(increase: true, by: seconds)
+        return finishedDate
     }
     
-    public func decreaseTime(by seconds: TimeInterval) {
+    @discardableResult
+    public func decreaseTime(by seconds: TimeInterval) -> Date? {
         increaseOrDecreaseTime(increase: false, by: seconds)
+        return finishedDate
     }
     
     private func increaseOrDecreaseTime(increase: Bool, by seconds: TimeInterval) {
