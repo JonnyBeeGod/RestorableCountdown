@@ -2,6 +2,7 @@ import Foundation
 import UserNotifications
 
 public protocol CountdownDelegate: class {
+    /// fires with the supplied `fireInterval` in `CountdownConfigurable`
     func timerDidFire(with currentTime: DateComponents)
     func timerDidFinish()
 }
